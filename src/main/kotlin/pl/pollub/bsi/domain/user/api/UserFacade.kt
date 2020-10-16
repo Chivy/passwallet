@@ -1,5 +1,5 @@
 package pl.pollub.bsi.domain.user.api
 
 interface UserFacade {
-    fun create(userCreationCommand: UserCreationCommand) : UserCreationResponse
+    fun create(userCreationCommand: UserCreationCommand) : UserResponse
 }

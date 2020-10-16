@@ -1,5 +1,7 @@
 package pl.pollub.bsi.application.password.api
 
-class CreatePasswordApplicationRequest {
-
-}
+data class CreatePasswordApplicationRequest(
+        val login: String,
+        val password: String,
+        val
+)

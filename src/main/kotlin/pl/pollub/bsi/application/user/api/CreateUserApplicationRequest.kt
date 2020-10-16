@@ -5,8 +5,8 @@ import pl.pollub.bsi.application.password.api.CreatePasswordApplicationRequest
 import pl.pollub.bsi.domain.api.Algorithm
 
 data class CreateUserApplicationRequest(
-        private val login: String,
-        private val password: String,
-        private val algorithm: Algorithm,
-        private val passwords : List<CreatePasswordApplicationRequest>
+        val login: String,
+        val password: String,
+        val algorithm: Algorithm,
+        val passwords : List<CreatePasswordApplicationRequest>
 ) {}
