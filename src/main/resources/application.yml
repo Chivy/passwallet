@@ -1,3 +1,14 @@
 micronaut:
   application:
     name: passwallet
+datasources:
+  default:
+    url: jdbc:postgresql://localhost:5432/passwallet
+    username: postgres
+    password: postgres
+    driverClassName: org.postgresql.Driver
+flyway:
+  datasources:
+    default:
+      enabled: true
+      locations: classpath:databasemigrations

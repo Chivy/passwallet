@@ -6,10 +6,13 @@ import pl.pollub.bsi.domain.password.api.PasswordCreationCommand
 import pl.pollub.bsi.domain.user.api.UserResponse
 
 class User(
-        private val login: String,
-        private val password: String,
-        private val algorithm: Algorithm,
-        private val passwords: List<PasswordCreationCommand>
+        val id: Long,
+        val login: String,
+        val password: String,
+        val algorithm: Algorithm,
+        val salt: String,
+        val isPasswordHashed: Boolean,
+        val passwords: List<Password>
 ) {
     fun toResponse(): UserResponse {
         return UserResponse(
@@ -17,6 +20,9 @@ class User(
                 this.password,
                 this.algorithm,
                 this.passwords
+                        .toStream()
+                        .map { it.toResponse() }
+                        .toList()
         )
     }
 

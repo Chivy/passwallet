@@ -1,22 +1,32 @@
 package pl.pollub.bsi.domain.user.api
 
 import io.vavr.collection.List
+import io.vavr.control.Option
+import io.vavr.kotlin.toVavrList
 import pl.pollub.bsi.application.user.api.CreateUserApplicationRequest
 import pl.pollub.bsi.domain.api.Algorithm
 import pl.pollub.bsi.domain.password.api.PasswordCreationCommand
 import pl.pollub.bsi.domain.user.User
+import java.util.*
 
 data class UserCreationCommand(
         val login: String,
         val password: String,
         val algorithm: Algorithm,
+        val salt: String,
         val passwords: List<PasswordCreationCommand>
 ) {
-    fun toDomain() : User {
+    fun toDomain(): User {
         return User(
+                0,
                 this.login,
                 this.password,
-                this.algorithm
+                this.algorithm,
+                UUID.randomUUID().toString(),
+                Option.of(salt).isDefined,
+                this.passwords
+                        .toStream()
+                        .map { it.toDomain() }.toVavrList()
         )
     }
 
@@ -26,9 +36,10 @@ data class UserCreationCommand(
                     applicationRequest.login,
                     applicationRequest.password,
                     applicationRequest.algorithm,
+                    UUID.randomUUID().toString(),
                     applicationRequest
                             .passwords
-                            .map(PasswordCreationCommand::of)
+                            .map(PasswordCreationCommand.Companion::of)
                             .toList()
             )
         }

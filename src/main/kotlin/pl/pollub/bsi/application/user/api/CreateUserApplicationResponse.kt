@@ -9,7 +9,7 @@ data class CreateUserApplicationResponse(
     companion object {
         fun of(userResponse: UserResponse) : CreateUserApplicationResponse {
             return CreateUserApplicationResponse(
-                    null
+                    userResponse.login
             )
         }
     }

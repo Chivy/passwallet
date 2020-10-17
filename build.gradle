@@ -5,6 +5,7 @@ plugins {
     id "groovy"
     id "com.github.johnrengelman.shadow" version "6.0.0"
     id "io.micronaut.application" version '1.0.3'
+    id 'nu.studer.jooq' version '5.1.1'
 }
 
 version "0.1"
@@ -32,9 +33,19 @@ dependencies {
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut.sql:micronaut-jooq")
+    annotationProcessor("io.micronaut:micronaut-inject-java")
+
+    //postgresql
+    implementation("org.postgresql:postgresql:42.2.12")
+
+    //jooq
+    compile('org.jooq:jooq:3.13.5')
+    jooqGenerator("org.postgresql:postgresql:42.2.12")
 
     //postgres
     runtime("org.postgresql:postgresql:42.2.12")
+    runtime("io.micronaut.sql:micronaut-jdbc-tomcat")
+    implementation("io.micronaut.flyway:micronaut-flyway")
 
     //kotlin
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
@@ -51,11 +62,70 @@ dependencies {
     implementation("io.vavr:vavr:0.10.3")
     implementation("io.vavr:vavr-jackson:0.10.3")
     implementation("io.vavr:vavr-kotlin:0.10.2")
+
+
 }
 
 mainClassName = "pl.pollub.bsi.ApplicationKt"
 java {
     sourceCompatibility = JavaVersion.toVersion('13')
+}
+
+jooq {
+    version = '3.13.4'  // default (can be omitted)
+    edition = nu.studer.gradle.jooq.JooqEdition.OSS  // default (can be omitted)
+
+    configurations {
+        main {  // name of the jOOQ configuration
+            generateSchemaSourceOnCompilation = true  // default (can be omitted)
+
+            generationTool {
+                logging = org.jooq.meta.jaxb.Logging.WARN
+                jdbc {
+                    driver = 'org.postgresql.Driver'
+                    url = 'jdbc:postgresql://localhost:5432/passwallet'
+                    user = 'postgres'
+                    password = 'postgres'
+                    properties {
+                        property {
+                            key = 'ssl'
+                            value = 'false'
+                        }
+                    }
+                }
+                generator {
+                    name = 'org.jooq.codegen.DefaultGenerator'
+                    database {
+                        name = 'org.jooq.meta.postgres.PostgresDatabase'
+                        inputSchema = 'public'
+                        forcedTypes {
+                            forcedType {
+                                name = 'varchar'
+                                includeExpression = '.*'
+                                includeTypes = 'JSONB?'
+                            }
+                            forcedType {
+                                name = 'varchar'
+                                includeExpression = '.*'
+                                includeTypes = 'INET'
+                            }
+                        }
+                    }
+                    generate {
+                        deprecated = false
+                        records = true
+                        immutablePojos = true
+                        fluentSetters = true
+                    }
+                    target {
+                        packageName = 'nu.studer.sample'
+                        directory = 'build/generated-src/jooq/main'  // default (can be omitted)
+                    }
+                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+                }
+            }
+        }
+    }
 }
 
 compileKotlin {
@@ -68,6 +138,3 @@ compileTestKotlin {
         jvmTarget = '13'
     }
 }
-
-
-
