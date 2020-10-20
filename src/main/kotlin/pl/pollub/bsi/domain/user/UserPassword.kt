@@ -2,7 +2,7 @@ package pl.pollub.bsi.domain.user
 
 import pl.pollub.bsi.domain.user.api.PasswordResponse
 
-data class Password(
+data class UserPassword(
         val login: String,
         val password: String,
         val webAddress: String,

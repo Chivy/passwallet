@@ -5,17 +5,14 @@ import io.vavr.control.Either
 import io.vavr.control.Option
 import pl.pollub.bsi.application.error.ErrorResponse
 import pl.pollub.bsi.domain.user.api.UserCreationCommand
-import pl.pollub.bsi.domain.user.api.UserResponse
-import pl.pollub.bsi.domain.user.port.PasswordRepository
 import pl.pollub.bsi.domain.user.port.UserRepository
 import javax.inject.Inject
 
 @Context
 internal class UserService(
         @Inject private val userRepository: UserRepository,
-        @Inject private val passwordRepository: PasswordRepository
 ) {
-    fun create(userCreationCommand: UserCreationCommand): Either<ErrorResponse, UserResponse> {
+    fun create(userCreationCommand: UserCreationCommand): Either<ErrorResponse, User> {
         return Option.of(userCreationCommand)
                 .map { it.toDomain() }
                 .filter { !userRepository.existsByLogin(it.login) }
@@ -30,12 +27,8 @@ internal class UserService(
                             user.salt,
                             user.isPasswordHashed,
                             user.passwords
-                                    .toStream()
-                                    .map { passwordRepository.save(it, user.id) }
-                                    .toList()
                     )
                 }
-                .map { it.toResponse() }
     }
 
 }

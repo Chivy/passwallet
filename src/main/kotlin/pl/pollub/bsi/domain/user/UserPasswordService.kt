@@ -12,11 +12,12 @@ import java.util.*
 @Context
 internal class UserPasswordService {
     fun createHashed(user: UserCreationCommand): UserCreationCommand {
+        val salt = UUID.randomUUID().toString()
         return UserCreationCommand(
                 user.login,
                 getDigest(user.algorithm, user.password),
                 user.algorithm,
-                UUID.randomUUID().toString(),
+                salt,
                 user.passwords
                         .toStream()
                         .map {

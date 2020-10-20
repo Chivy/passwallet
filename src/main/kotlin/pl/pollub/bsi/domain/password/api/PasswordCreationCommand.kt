@@ -1,7 +1,8 @@
 package pl.pollub.bsi.domain.password.api
 
 import pl.pollub.bsi.application.password.api.CreatePasswordApplicationRequest
-import pl.pollub.bsi.domain.user.Password
+import pl.pollub.bsi.domain.password.Password
+import pl.pollub.bsi.domain.user.UserPassword
 
 data class PasswordCreationCommand(
         val login: String,
@@ -9,8 +10,8 @@ data class PasswordCreationCommand(
         val webAddress: String,
         val description: String
 ) {
-    fun toDomain(): Password {
-        return Password(
+    fun toDomain(): UserPassword {
+        return UserPassword(
                 this.login,
                 this.password,
                 this.webAddress,

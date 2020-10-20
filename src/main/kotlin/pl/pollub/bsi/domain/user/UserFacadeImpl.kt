@@ -12,12 +12,11 @@ import javax.inject.Singleton
 @Singleton
 internal class UserFacadeImpl(
         @Inject private val userService: UserService,
-        @Inject private val userPasswordService: UserPasswordService
 ) : UserFacade {
     override fun create(userCreationCommand: UserCreationCommand): Either<ErrorResponse, UserResponse> {
         return Option.of(userCreationCommand)
-                .map { userPasswordService.createHashed(it) }
-                .map { userService.create(it) }
-                .getOrElse { Either.left(ErrorResponse.unexpected()) }
+                .toEither(ErrorResponse.unexpected())
+                .flatMap { userService.create(it) }
+                .map { it.toResponse() }
     }
 }

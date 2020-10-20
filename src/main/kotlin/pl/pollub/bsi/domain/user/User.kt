@@ -2,7 +2,7 @@ package pl.pollub.bsi.domain.user
 
 import io.vavr.collection.List
 import pl.pollub.bsi.domain.api.Algorithm
-import pl.pollub.bsi.domain.password.api.PasswordCreationCommand
+import pl.pollub.bsi.domain.password.Password
 import pl.pollub.bsi.domain.user.api.UserResponse
 
 class User(
@@ -12,7 +12,7 @@ class User(
         val algorithm: Algorithm,
         val salt: String,
         val isPasswordHashed: Boolean,
-        val passwords: List<Password>
+        val passwords: List<UserPassword>
 ) {
     fun toResponse(): UserResponse {
         return UserResponse(
@@ -26,4 +26,15 @@ class User(
         )
     }
 
+    fun withPasswords(passwords: List<UserPassword>): User {
+        return User(
+                this.id,
+                this.login,
+                this.password,
+                this.algorithm,
+                this.salt,
+                this.isPasswordHashed,
+                passwords
+        )
+    }
 }

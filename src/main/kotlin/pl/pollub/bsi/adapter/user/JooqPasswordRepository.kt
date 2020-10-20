@@ -2,12 +2,13 @@ package pl.pollub.bsi.adapter.user
 
 import nu.studer.sample.tables.Passwords.PASSWORDS
 import org.jooq.DSLContext
-import pl.pollub.bsi.domain.user.Password
-import pl.pollub.bsi.domain.user.port.PasswordRepository
+import pl.pollub.bsi.domain.password.Password
+import pl.pollub.bsi.domain.password.PasswordId
+import pl.pollub.bsi.domain.password.port.PasswordRepository
 import javax.inject.Singleton
 
 @Singleton
-class JooqPasswordRepository(
+internal class JooqPasswordRepository(
         private val dslContext: DSLContext
 ) : PasswordRepository {
     override fun save(password: Password, userId: Long): Password {
@@ -35,10 +36,14 @@ class JooqPasswordRepository(
                 .fetchOne()
                 .map {
                     Password(
+                            PasswordId(
+                                    it.getValue(PASSWORDS.ID),
+                                    it.getValue(PASSWORDS.USER_ID)
+                            ),
                             it.getValue(PASSWORDS.LOGIN),
                             it.getValue(PASSWORDS.PASSWORD),
-                            it.getValue (PASSWORDS.WEB_ADDRESS),
-                            it.getValue (PASSWORDS.DESCRIPTION)
+                            it.getValue(PASSWORDS.WEB_ADDRESS),
+                            it.getValue(PASSWORDS.DESCRIPTION)
                     )
                 }
     }

@@ -6,6 +6,7 @@ plugins {
     id "com.github.johnrengelman.shadow" version "6.0.0"
     id "io.micronaut.application" version '1.0.3'
     id 'nu.studer.jooq' version '5.1.1'
+    id 'org.flywaydb.flyway' version '7.0.4'
 }
 
 version "0.1"
@@ -64,6 +65,13 @@ dependencies {
     implementation("io.vavr:vavr-kotlin:0.10.2")
 
 
+}
+
+flyway {
+    url = 'jdbc:postgresql://localhost:5432/passwallet'
+    user = 'postgres'
+    password = 'postgres'
+    locations = ['classpath:databasemigrations']
 }
 
 mainClassName = "pl.pollub.bsi.ApplicationKt"
