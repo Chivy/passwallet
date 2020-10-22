@@ -1,4 +1,4 @@
-package pl.pollub.bsi.application.api
+package pl.pollub.bsi.application.user.api
 
 import pl.pollub.bsi.domain.user.api.UserResponse
 

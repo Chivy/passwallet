@@ -1,20 +1,20 @@
 package pl.pollub.bsi.application.user
 
 import io.vavr.collection.List
-import io.vavr.collection.Stream
 import io.vavr.control.Either
 import io.vavr.control.Option
+import io.vavr.kotlin.left
+import io.vavr.kotlin.toVavrList
 import pl.pollub.bsi.application.api.CreateUserApplicationResponse
 import pl.pollub.bsi.application.error.ErrorResponse
 import pl.pollub.bsi.application.password.api.PasswordFacade
 import pl.pollub.bsi.application.user.api.CreateUserApplicationRequest
+import pl.pollub.bsi.application.user.api.CreateUserApplicationResponse
 import pl.pollub.bsi.domain.password.api.PasswordCreationCommand
-import pl.pollub.bsi.domain.user.User
 import pl.pollub.bsi.domain.user.api.PasswordResponse
 import pl.pollub.bsi.domain.user.api.UserCreationCommand
 import pl.pollub.bsi.domain.user.api.UserFacade
 import pl.pollub.bsi.domain.user.api.UserResponse
-import java.util.function.Function
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,16 +25,35 @@ class UserApplicationService(
 ) {
     fun save(createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, CreateUserApplicationResponse> {
         return userFacade.create(UserCreationCommand.of(createUserApplicationRequest))
-                .map { it.withPasswords(createPasswords(createUserApplicationRequest)) }
+                .flatMap { createPasswords(it, createUserApplicationRequest) }
+
                 .map { CreateUserApplicationResponse.of(it) }
     }
 
-    private fun createPasswords(createUserApplicationRequest: CreateUserApplicationRequest): List<PasswordResponse> {
+    private fun createPasswords(user: UserResponse, createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, UserResponse> {
+        val passwordCreationResponses = delegatePasswordCreation(createUserApplicationRequest, user)
+        return passwordCreationResponses
+                .toStream()
+                .find { it.isLeft }
+                .map { Either.left<ErrorResponse, UserResponse>(it.left) }
+                .getOrElse {
+                    Either.right(
+                            user.withPasswords(
+                                    passwordCreationResponses
+                                            .toStream()
+                                            .map { it.get() }
+                                            .toVavrList()
+                            )
+                    )
+                }
+    }
+
+    private fun delegatePasswordCreation(createUserApplicationRequest: CreateUserApplicationRequest, user: UserResponse): List<Either<ErrorResponse, PasswordResponse>> {
         return Option.of(createUserApplicationRequest.passwords)
                 .getOrElse { List.empty() }
                 .toStream()
-                .map { passwordFacade.create(PasswordCreationCommand.of(it)) }
-                .toList()
+                .map { passwordFacade.create(user.id, PasswordCreationCommand.of(it)) }
+                .toVavrList()
     }
 
 }
