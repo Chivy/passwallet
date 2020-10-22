@@ -19,4 +19,8 @@ internal class UserFacadeImpl(
                 .flatMap { userService.create(it) }
                 .map { it.toResponse() }
     }
+
+    override fun details(userId: Long): Option<UserResponse> {
+        return userService.details(userId)
+    }
 }

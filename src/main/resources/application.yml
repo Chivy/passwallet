@@ -1,6 +1,14 @@
 micronaut:
   application:
     name: passwallet
+  security:
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: cf4bc0bc-19db-4ad7-8e2c-47ad8310c1ed
 datasources:
   default:
     url: jdbc:postgresql://localhost:5432/passwallet

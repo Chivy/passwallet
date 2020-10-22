@@ -1,6 +1,5 @@
 package pl.pollub.bsi.domain.password
 
-import pl.pollub.bsi.domain.user.UserPassword
 import pl.pollub.bsi.domain.user.api.PasswordResponse
 
 internal data class Password(
@@ -19,12 +18,13 @@ internal data class Password(
         )
     }
 
-    fun toUserPassword(): UserPassword {
-        return UserPassword(
+    fun withPassword(encryptedPassword: String): Password {
+        return Password(
+                this.passwordId,
                 this.login,
-                this.password,
+                encryptedPassword,
                 this.webAddress,
-                this.description,
+                this.description
         )
     }
 

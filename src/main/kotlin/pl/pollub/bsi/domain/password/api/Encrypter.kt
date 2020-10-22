@@ -11,9 +11,9 @@ import javax.xml.crypto.dsig.SignatureMethod;
 
 internal class Encrypter {
 
-    fun encrypt(algorithm: String, password: String): String {
+    fun encrypt(algorithm: String, password: String, salt: String?): String {
         return when (algorithm) {
-            "SHA-512" -> SHA512.encrypt(password)
+            "SHA-512" -> SHA512.encrypt(password, salt)
             "HMAC" -> HMAC.encrypt(password)
             else -> AES.encrypt(password)
         }
@@ -21,10 +21,10 @@ internal class Encrypter {
 
     class SHA512 {
         companion object {
-            private const val pepper =
-            fun encrypt(password: String): String {
+            private const val pepper = "a5354ff8"
+            fun encrypt(password: String, salt: String?): String {
                 val messageDigest: MessageDigest = MessageDigest.getInstance("SHA-512")
-                messageDigest.update(password.toByteArray(StandardCharsets.UTF_8))
+                messageDigest.update((password + salt + pepper).toByteArray(StandardCharsets.UTF_8))
                 return String.format("%064x", BigInteger(1, messageDigest.digest()))
             }
         }
@@ -46,7 +46,7 @@ internal class Encrypter {
 
     class AES {
         companion object {
-            private const val key = "bb14d5c0-3dcd-47a0-9a67-973d4899165a";
+            private const val key = "bb14d5c03dcd47a0";
             fun encrypt(password: String): String {
                 val cipher = Cipher.getInstance("AES")
                 cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key.toByteArray(), "AES"))

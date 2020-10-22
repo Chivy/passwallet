@@ -1,11 +1,10 @@
 package pl.pollub.bsi.application.user
 
+import io.micronaut.transaction.SynchronousTransactionManager
 import io.vavr.collection.List
 import io.vavr.control.Either
 import io.vavr.control.Option
-import io.vavr.kotlin.left
 import io.vavr.kotlin.toVavrList
-import pl.pollub.bsi.application.api.CreateUserApplicationResponse
 import pl.pollub.bsi.application.error.ErrorResponse
 import pl.pollub.bsi.application.password.api.PasswordFacade
 import pl.pollub.bsi.application.user.api.CreateUserApplicationRequest
@@ -15,19 +14,32 @@ import pl.pollub.bsi.domain.user.api.PasswordResponse
 import pl.pollub.bsi.domain.user.api.UserCreationCommand
 import pl.pollub.bsi.domain.user.api.UserFacade
 import pl.pollub.bsi.domain.user.api.UserResponse
+import java.sql.Connection
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class UserApplicationService(
         @Inject private val userFacade: UserFacade,
-        @Inject private val passwordFacade: PasswordFacade
+        @Inject private val passwordFacade: PasswordFacade,
+        @Inject private val transactionManager: SynchronousTransactionManager<Connection>
 ) {
-    fun save(createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, CreateUserApplicationResponse> {
-        return userFacade.create(UserCreationCommand.of(createUserApplicationRequest))
-                .flatMap { createPasswords(it, createUserApplicationRequest) }
 
-                .map { CreateUserApplicationResponse.of(it) }
+    fun save(createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, CreateUserApplicationResponse> {
+        return transactionManager.executeWrite { transactionStatus ->
+            val result = userFacade.create(UserCreationCommand.of(createUserApplicationRequest))
+                    .flatMap { createPasswords(it, createUserApplicationRequest) }
+                    .map { CreateUserApplicationResponse.of(it) }
+
+            if (result.isLeft)
+                transactionStatus.setRollbackOnly()
+            result
+        }
+    }
+
+    fun details(userId: Long): Option<UserResponse> {
+        return userFacade.details(userId)
+                .map { it.withPasswords(passwordFacade.findByUserId(it.id)) }
     }
 
     private fun createPasswords(user: UserResponse, createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, UserResponse> {
@@ -55,5 +67,6 @@ class UserApplicationService(
                 .map { passwordFacade.create(user.id, PasswordCreationCommand.of(it)) }
                 .toVavrList()
     }
+
 
 }

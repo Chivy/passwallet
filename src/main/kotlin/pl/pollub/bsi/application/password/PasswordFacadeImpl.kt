@@ -1,10 +1,12 @@
 package pl.pollub.bsi.application.password
 
 import io.micronaut.context.annotation.Context
+import io.vavr.collection.List
 import io.vavr.control.Either
 import io.vavr.control.Option
 import pl.pollub.bsi.application.error.ErrorResponse
 import pl.pollub.bsi.application.password.api.PasswordFacade
+import pl.pollub.bsi.domain.password.api.Encrypter
 import pl.pollub.bsi.domain.password.api.PasswordCreationCommand
 import pl.pollub.bsi.domain.user.api.PasswordResponse
 
@@ -15,8 +17,12 @@ internal class PasswordFacadeImpl(
     override fun create(userId: Long, passwordCreationCommand: PasswordCreationCommand): Either<ErrorResponse, PasswordResponse> {
         return Option.of(passwordCreationCommand)
                 .toEither { ErrorResponse.unexpected() }
-                .flatMap { passwordService.create(it) }
+                .flatMap { passwordService.create(userId, it) }
                 .map { it.toResponse() }
 
+    }
+
+    override fun findByUserId(userId: Long): List<PasswordResponse> {
+        return passwordService.findByUserId(userId)
     }
 }

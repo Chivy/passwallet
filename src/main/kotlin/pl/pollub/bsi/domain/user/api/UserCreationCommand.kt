@@ -26,7 +26,7 @@ data class UserCreationCommand(
                 Option.of(salt).isDefined,
                 this.passwords
                         .toStream()
-                        .map { it.toDomain() }.toVavrList()
+                        .map { it.toUserDomain() }.toVavrList()
         )
     }
 

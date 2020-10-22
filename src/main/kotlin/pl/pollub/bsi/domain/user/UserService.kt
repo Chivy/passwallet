@@ -1,10 +1,12 @@
 package pl.pollub.bsi.domain.user
 
 import io.micronaut.context.annotation.Context
+import io.vavr.collection.List
 import io.vavr.control.Either
 import io.vavr.control.Option
 import pl.pollub.bsi.application.error.ErrorResponse
 import pl.pollub.bsi.domain.user.api.UserCreationCommand
+import pl.pollub.bsi.domain.user.api.UserResponse
 import pl.pollub.bsi.domain.user.port.UserRepository
 import javax.inject.Inject
 
@@ -29,6 +31,22 @@ internal class UserService(
                             user.passwords
                     )
                 }
+    }
+
+    fun details(userId: Long): Option<UserResponse> {
+        return userRepository.findById(userId)
+                .map {
+                    User(
+                            it.id,
+                            it.login,
+                            it.password,
+                            it.algorithm,
+                            it.salt,
+                            it.isPasswordHashed,
+                            List.empty()
+                    )
+                }
+                .map { it.toResponse() }
     }
 
 }

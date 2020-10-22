@@ -34,7 +34,10 @@ dependencies {
     implementation("io.micronaut:micronaut-runtime")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut.sql:micronaut-jooq")
+    implementation("io.micronaut.security:micronaut-security-jwt")
+    implementation("io.micronaut.data:micronaut-data-jdbc:2.1.0")
     annotationProcessor("io.micronaut:micronaut-inject-java")
+    annotationProcessor("io.micronaut.security:micronaut-security-annotations")
 
     //postgresql
     implementation("org.postgresql:postgresql:42.2.12")
@@ -76,7 +79,7 @@ flyway {
 
 mainClassName = "pl.pollub.bsi.ApplicationKt"
 java {
-    sourceCompatibility = JavaVersion.toVersion('13')
+    sourceCompatibility = JavaVersion.toVersion('11')
 }
 
 jooq {
@@ -138,11 +141,11 @@ jooq {
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = '13'
+        jvmTarget = '11'
     }
 }
 compileTestKotlin {
     kotlinOptions {
-        jvmTarget = '13'
+        jvmTarget = '11'
     }
 }

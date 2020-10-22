@@ -16,6 +16,7 @@ class User(
 ) {
     fun toResponse(): UserResponse {
         return UserResponse(
+                this.id,
                 this.login,
                 this.password,
                 this.algorithm,
@@ -23,18 +24,6 @@ class User(
                         .toStream()
                         .map { it.toResponse() }
                         .toList()
-        )
-    }
-
-    fun withPasswords(passwords: List<UserPassword>): User {
-        return User(
-                this.id,
-                this.login,
-                this.password,
-                this.algorithm,
-                this.salt,
-                this.isPasswordHashed,
-                passwords
         )
     }
 }
