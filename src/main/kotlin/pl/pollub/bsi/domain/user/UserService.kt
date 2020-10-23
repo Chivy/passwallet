@@ -33,8 +33,9 @@ internal class UserService(
                 }
     }
 
-    fun details(userId: Long): Option<UserResponse> {
+    fun details(userId: Long): Either<ErrorResponse, UserResponse> {
         return userRepository.findById(userId)
+                .toEither { ErrorResponse("User with ID: $userId not found.") }
                 .map {
                     User(
                             it.id,

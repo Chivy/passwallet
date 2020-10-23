@@ -6,6 +6,7 @@ internal data class Password(
         val passwordId: PasswordId,
         val login: String,
         val password: String,
+        val masterPassword: String?,
         val webAddress: String,
         val description: String
 ) {
@@ -23,6 +24,7 @@ internal data class Password(
                 this.passwordId,
                 this.login,
                 encryptedPassword,
+                this.masterPassword,
                 this.webAddress,
                 this.description
         )

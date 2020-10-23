@@ -50,6 +50,7 @@ internal class JooqPasswordRepository(
                             ),
                             it.getValue(PASSWORDS.LOGIN),
                             it.getValue(PASSWORDS.PASSWORD),
+                            null,
                             it.getValue(PASSWORDS.WEB_ADDRESS),
                             it.getValue(PASSWORDS.DESCRIPTION)
                     )
@@ -69,6 +70,7 @@ internal class JooqPasswordRepository(
                             ),
                             it.getValue(PASSWORDS.LOGIN),
                             it.getValue(PASSWORDS.PASSWORD),
+                            null,
                             it.getValue(PASSWORDS.WEB_ADDRESS),
                             it.getValue(PASSWORDS.DESCRIPTION)
                     )

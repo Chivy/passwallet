@@ -11,11 +11,11 @@ import javax.xml.crypto.dsig.SignatureMethod;
 
 internal class Encrypter {
 
-    fun encrypt(algorithm: String, password: String, salt: String?): String {
+    fun encrypt(algorithm: String, password: String, key: String?): String {
         return when (algorithm) {
-            "SHA-512" -> SHA512.encrypt(password, salt)
+            "SHA-512" -> SHA512.encrypt(password, key)
             "HMAC" -> HMAC.encrypt(password)
-            else -> AES.encrypt(password)
+            else -> AES.encrypt(password, key)
         }
     }
 
@@ -46,15 +46,14 @@ internal class Encrypter {
 
     class AES {
         companion object {
-            private const val key = "bb14d5c03dcd47a0";
-            fun encrypt(password: String): String {
+            fun encrypt(password: String, key: String?): String {
                 val cipher = Cipher.getInstance("AES")
-                cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key.toByteArray(), "AES"))
+                cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(key?.toByteArray(), "AES"))
                 val encrypted = cipher.doFinal(password.toByteArray())
                 return Base64.getEncoder().encodeToString(encrypted)
             }
 
-            fun decrypt(password: String) : String {
+            fun decrypt(password: String, key: String) : String {
                 val cipher = Cipher.getInstance("AES")
                 cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(key.toByteArray(), "AES"))
                 val decoded = Base64.getDecoder().decode(password)

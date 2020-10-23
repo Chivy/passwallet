@@ -7,5 +7,5 @@ import pl.pollub.bsi.domain.user.User
 
 interface UserFacade {
     fun create(userCreationCommand: UserCreationCommand) : Either<ErrorResponse, UserResponse>
-    fun details(userId: Long): Option<UserResponse>
+    fun details(userId: Long): Either<ErrorResponse, UserResponse>
 }

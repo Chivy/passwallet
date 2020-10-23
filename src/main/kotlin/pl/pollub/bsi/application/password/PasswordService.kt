@@ -17,7 +17,7 @@ internal class PasswordService(@Inject private val passwordRepository: PasswordR
     fun create(userId: Long, passwordCreationCommand: PasswordCreationCommand): Either<ErrorResponse, Password> {
         return Option.of(passwordCreationCommand)
                 .map { it.toDomain(userId) }
-                .map { it.withPassword(Encrypter.AES.encrypt(it.password)) }
+                .map { it.withPassword(Encrypter.AES.encrypt(it.password, it.masterPassword)) }
                 .map { passwordRepository.save(userId, it) }
                 .toEither { ErrorResponse.unexpected() }
     }

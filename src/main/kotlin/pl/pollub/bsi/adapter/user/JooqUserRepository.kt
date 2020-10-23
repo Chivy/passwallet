@@ -19,13 +19,15 @@ class JooqUserRepository(
 ) : UserRepository {
     override fun save(user: User): User {
         return dslContext.insertInto(USER)
-                .columns(USER.LOGIN,
+                .columns(
+                        USER.LOGIN,
                         USER.PASSWORD_HASH,
                         USER.ALGORITHM,
                         USER.SALT,
                         USER.IS_PASSWORD_KEPT_AS_HASH
                 )
-                .values(user.login,
+                .values(
+                        user.login,
                         user.password,
                         user.algorithm.instance,
                         user.salt,

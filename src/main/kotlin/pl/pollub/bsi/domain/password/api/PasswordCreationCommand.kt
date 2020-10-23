@@ -9,7 +9,8 @@ data class PasswordCreationCommand(
         val login: String,
         val password: String,
         val webAddress: String,
-        val description: String
+        val description: String,
+        val masterPassword: String
 ) {
     fun toUserDomain(): UserPassword {
         return UserPassword(
@@ -28,19 +29,26 @@ data class PasswordCreationCommand(
                 ),
                 this.login,
                 this.password,
+                this.masterPassword,
                 this.webAddress,
-                this.description
+                this.description,
         )
     }
 
     companion object {
         fun of(applicationRequest: CreatePasswordApplicationRequest): PasswordCreationCommand {
+            return of(applicationRequest, "")
+        }
+
+        fun of(applicationRequest: CreatePasswordApplicationRequest, masterPassword: String) : PasswordCreationCommand {
             return PasswordCreationCommand(
                     applicationRequest.login,
                     applicationRequest.password,
                     applicationRequest.webAddress,
-                    applicationRequest.description
+                    applicationRequest.description,
+                    masterPassword
             )
+
         }
     }
 }

@@ -1,13 +1,14 @@
 package pl.pollub.bsi.application.user
 
+import io.micronaut.context.annotation.Parameter
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
-import io.micronaut.http.annotation.Controller
-import io.micronaut.http.annotation.Get
-import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.Post
+import io.micronaut.http.annotation.*
+import io.micronaut.security.annotation.Secured
+import io.micronaut.security.rules.SecurityRule
 import pl.pollub.bsi.application.user.api.CreateUserApplicationRequest
 import pl.pollub.bsi.infrastructure.response.ResponseResolver
+import java.security.Principal
 import javax.annotation.security.PermitAll
 import javax.inject.Inject
 
@@ -19,16 +20,21 @@ class UserController(
 
     @PermitAll
     @Post
-    fun register(createUserApplicationRequest: CreateUserApplicationRequest): HttpResponse<Any> {
+    fun register(@Body createUserApplicationRequest: CreateUserApplicationRequest): HttpResponse<Any> {
         return responseResolver.resolve(
                 userApplicationService.save(createUserApplicationRequest), HttpStatus.CREATED
         )
     }
 
     @Get("/{userId}")
-    fun details(@PathVariable userId: Long) : HttpResponse<Any> {
+    @Secured(SecurityRule.IS_AUTHENTICATED)
+    fun details(@PathVariable userId: Long,
+                @QueryValue passwordsDisclosed: Boolean,
+    principal: Principal) : HttpResponse<Any> {
+
+        println(principal.name)
         return responseResolver.resolve(
-                userApplicationService.details(userId)
+                userApplicationService.details(userId, passwordsDisclosed), HttpStatus.OK
         )
     }
 }

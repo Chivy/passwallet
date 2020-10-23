@@ -20,7 +20,7 @@ internal class UserFacadeImpl(
                 .map { it.toResponse() }
     }
 
-    override fun details(userId: Long): Option<UserResponse> {
+    override fun details(userId: Long): Either<ErrorResponse, UserResponse> {
         return userService.details(userId)
     }
 }

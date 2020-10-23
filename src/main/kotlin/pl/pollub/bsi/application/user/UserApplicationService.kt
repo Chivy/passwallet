@@ -9,6 +9,7 @@ import pl.pollub.bsi.application.error.ErrorResponse
 import pl.pollub.bsi.application.password.api.PasswordFacade
 import pl.pollub.bsi.application.user.api.CreateUserApplicationRequest
 import pl.pollub.bsi.application.user.api.CreateUserApplicationResponse
+import pl.pollub.bsi.domain.password.api.Encrypter
 import pl.pollub.bsi.domain.password.api.PasswordCreationCommand
 import pl.pollub.bsi.domain.user.api.PasswordResponse
 import pl.pollub.bsi.domain.user.api.UserCreationCommand
@@ -37,9 +38,28 @@ class UserApplicationService(
         }
     }
 
-    fun details(userId: Long): Option<UserResponse> {
+    fun details(userId: Long, passwordsDisclosed: Boolean): Either<ErrorResponse, UserResponse> {
+        val passwords = passwordFacade.findByUserId(userId)
         return userFacade.details(userId)
-                .map { it.withPasswords(passwordFacade.findByUserId(it.id)) }
+                .map { userResponse ->
+                    Option.of(passwords)
+                            .filter { passwordsDisclosed }
+                            .map {
+                                passwords
+                                        .toStream()
+                                        .map {
+                                            it.withPassword(
+                                                    Encrypter.AES.decrypt(
+                                                            it.password,
+                                                            userResponse.password
+                                                    )
+                                            )
+                                        }
+                                        .toVavrList()
+                            }
+                            .map { userResponse.withPasswords(it) }
+                            .getOrElse { userResponse.withPasswords(passwords) }
+                }
     }
 
     private fun createPasswords(user: UserResponse, createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, UserResponse> {
@@ -64,7 +84,7 @@ class UserApplicationService(
         return Option.of(createUserApplicationRequest.passwords)
                 .getOrElse { List.empty() }
                 .toStream()
-                .map { passwordFacade.create(user.id, PasswordCreationCommand.of(it)) }
+                .map { passwordFacade.create(user.id, PasswordCreationCommand.of(it, user.password)) }
                 .toVavrList()
     }
 

@@ -23,7 +23,7 @@ data class UserCreationCommand(
                 this.password,
                 this.algorithm,
                 UUID.randomUUID().toString(),
-                Option.of(salt).isDefined,
+                this.algorithm == Algorithm.SHA_512,
                 this.passwords
                         .toStream()
                         .map { it.toUserDomain() }.toVavrList()
