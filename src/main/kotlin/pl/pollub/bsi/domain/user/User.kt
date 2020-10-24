@@ -26,4 +26,16 @@ class User(
                         .toList()
         )
     }
+
+    fun withPassword(password: String) : User {
+        return User(
+                this.id,
+                this.login,
+                password,
+                this.algorithm,
+                this.salt,
+                this.isPasswordHashed,
+                this.passwords
+        )
+    }
 }

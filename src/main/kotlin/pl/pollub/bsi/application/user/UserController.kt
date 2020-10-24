@@ -1,11 +1,11 @@
 package pl.pollub.bsi.application.user
 
-import io.micronaut.context.annotation.Parameter
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.*
 import io.micronaut.security.annotation.Secured
 import io.micronaut.security.rules.SecurityRule
+import io.vavr.control.Option
 import pl.pollub.bsi.application.user.api.CreateUserApplicationRequest
 import pl.pollub.bsi.infrastructure.response.ResponseResolver
 import java.security.Principal
@@ -26,15 +26,18 @@ class UserController(
         )
     }
 
-    @Get("/{userId}")
+    @Get("{userId}")
     @Secured(SecurityRule.IS_AUTHENTICATED)
     fun details(@PathVariable userId: Long,
-                @QueryValue passwordsDisclosed: Boolean,
-    principal: Principal) : HttpResponse<Any> {
+                passwordDisclosed: Boolean?,
+                principal: Principal): HttpResponse<Any> {
 
-        println(principal.name)
         return responseResolver.resolve(
-                userApplicationService.details(userId, passwordsDisclosed), HttpStatus.OK
+                userApplicationService.details(
+                        userId,
+                        principal.name,
+                        Option.of(passwordDisclosed).getOrElse(false)!!,
+                ), HttpStatus.OK
         )
     }
 }

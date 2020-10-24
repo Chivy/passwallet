@@ -38,29 +38,32 @@ class UserApplicationService(
         }
     }
 
-    fun details(userId: Long, passwordsDisclosed: Boolean): Either<ErrorResponse, UserResponse> {
-        val passwords = passwordFacade.findByUserId(userId)
-        return userFacade.details(userId)
-                .map { userResponse ->
-                    Option.of(passwords)
-                            .filter { passwordsDisclosed }
-                            .map {
-                                passwords
-                                        .toStream()
-                                        .map {
-                                            it.withPassword(
-                                                    Encrypter.AES.decrypt(
-                                                            it.password,
-                                                            userResponse.password
-                                                    )
-                                            )
-                                        }
-                                        .toVavrList()
-                            }
-                            .map { userResponse.withPasswords(it) }
-                            .getOrElse { userResponse.withPasswords(passwords) }
-                }
+    fun details(userId: Long, username: String, passwordsDisclosed: Boolean): Either<ErrorResponse, UserResponse> {
+        return transactionManager.executeRead {
+            val passwords = passwordFacade.findByUserId(userId)
+            return@executeRead userFacade.details(userId, username)
+                    .map { userResponse ->
+                        Option.of(passwords)
+                                .filter { passwordsDisclosed }
+                                .map {
+                                    passwords
+                                            .toStream()
+                                            .map {
+                                                it.withPassword(
+                                                        Encrypter.AES.decrypt(
+                                                                it.password,
+                                                                userResponse.password
+                                                        )
+                                                )
+                                            }
+                                            .toVavrList()
+                                }
+                                .map { userResponse.withPasswords(it) }
+                                .getOrElse { userResponse.withPasswords(passwords) }
+                    }
+        }
     }
+
 
     private fun createPasswords(user: UserResponse, createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, UserResponse> {
         val passwordCreationResponses = delegatePasswordCreation(createUserApplicationRequest, user)

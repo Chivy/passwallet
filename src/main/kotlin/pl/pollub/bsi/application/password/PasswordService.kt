@@ -23,7 +23,8 @@ internal class PasswordService(@Inject private val passwordRepository: PasswordR
     }
 
     fun findByUserId(userId: Long): List<PasswordResponse> {
-        return List.empty()
+        return passwordRepository.findByUserId(userId)
+                .map { it.toResponse() }
     }
 
 }
