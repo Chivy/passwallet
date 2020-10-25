@@ -13,5 +13,12 @@ enum class Algorithm(val instance: String) {
                     .find { name == it.instance }
                     .orNull
         }
+
+        fun valueOf(name: String): Algorithm {
+            return values()
+                    .toVavrStream()
+                    .find { it.instance == name }
+                    .getOrElseThrow { RuntimeException() }
+        }
     }
 }

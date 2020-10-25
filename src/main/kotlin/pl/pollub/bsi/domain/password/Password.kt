@@ -12,6 +12,8 @@ internal data class Password(
 ) {
     fun toResponse(): PasswordResponse {
         return PasswordResponse(
+                this.passwordId.id,
+                this.passwordId.userId,
                 this.login,
                 this.password,
                 this.webAddress,
@@ -19,11 +21,11 @@ internal data class Password(
         )
     }
 
-    fun withPassword(encryptedPassword: String): Password {
+    fun withPassword(password: String): Password {
         return Password(
                 this.passwordId,
                 this.login,
-                encryptedPassword,
+                password,
                 this.masterPassword,
                 this.webAddress,
                 this.description

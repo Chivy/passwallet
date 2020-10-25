@@ -1,14 +1,17 @@
 package pl.pollub.bsi.adapter.user
 
 import io.vavr.collection.List
+import io.vavr.control.Option
 import io.vavr.kotlin.toVavrList
 import io.vavr.kotlin.toVavrStream
 import nu.studer.sample.Sequences
 import nu.studer.sample.Tables.PASSWORDS
 import org.jooq.DSLContext
+import org.jooq.impl.DSL.row
 import pl.pollub.bsi.domain.password.Password
 import pl.pollub.bsi.domain.password.PasswordId
 import pl.pollub.bsi.domain.password.port.PasswordRepository
+import pl.pollub.bsi.domain.user.api.PasswordResponse
 import javax.inject.Singleton
 
 @Singleton
@@ -50,11 +53,65 @@ internal class JooqPasswordRepository(
                             ),
                             it.getValue(PASSWORDS.LOGIN),
                             it.getValue(PASSWORDS.PASSWORD),
+                            password.masterPassword,
+                            it.getValue(PASSWORDS.WEB_ADDRESS),
+                            it.getValue(PASSWORDS.DESCRIPTION)
+                    )
+                }
+    }
+
+    override fun update(passwordId: PasswordId, password: String): Password {
+        return dslContext.update(PASSWORDS)
+                .set(
+                        row(PASSWORDS.PASSWORD),
+                        row(password)
+                )
+                .where(PASSWORDS.ID.eq(passwordId.id))
+                .and(PASSWORDS.USER_ID.eq(passwordId.userId))
+                .returning(
+                        PASSWORDS.ID,
+                        PASSWORDS.USER_ID,
+                        PASSWORDS.LOGIN,
+                        PASSWORDS.PASSWORD,
+                        PASSWORDS.WEB_ADDRESS,
+                        PASSWORDS.DESCRIPTION
+                )
+                .fetchOne()
+                .map {
+                    Password(
+                            PasswordId(
+                                    it.getValue(PASSWORDS.ID),
+                                    it.getValue(PASSWORDS.USER_ID)
+                            ),
+                            it.getValue(PASSWORDS.LOGIN),
+                            it.getValue(PASSWORDS.PASSWORD),
                             null,
                             it.getValue(PASSWORDS.WEB_ADDRESS),
                             it.getValue(PASSWORDS.DESCRIPTION)
                     )
                 }
+
+    }
+
+    override fun findById(passwordId: Long): Option<Password> {
+        return Option.of(
+                dslContext.selectFrom(PASSWORDS)
+                        .where(PASSWORDS.ID.eq(passwordId))
+                        .fetchOne()
+                        .map {
+                            Password(
+                                    PasswordId(
+                                            it.getValue(PASSWORDS.ID),
+                                            it.getValue(PASSWORDS.USER_ID)
+                                    ),
+                                    it.getValue(PASSWORDS.LOGIN),
+                                    it.getValue(PASSWORDS.PASSWORD),
+                                    null,
+                                    it.getValue(PASSWORDS.WEB_ADDRESS),
+                                    it.getValue(PASSWORDS.DESCRIPTION)
+                            )
+                        }
+        )
     }
 
     override fun findByUserId(userId: Long): List<Password> {
@@ -63,7 +120,7 @@ internal class JooqPasswordRepository(
                 .fetch()
                 .toVavrStream()
                 .map {
-                    Password (
+                    Password(
                             PasswordId(
                                     it.getValue(PASSWORDS.ID),
                                     it.getValue(PASSWORDS.USER_ID)

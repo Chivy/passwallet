@@ -15,10 +15,4 @@ class ResponseResolver {
                 .map { HttpResponse.ok(it).status(status) }
                 .getOrElseGet { HttpResponse.badRequest(it) }
     }
-
-    fun resolve(response: Option<out Any>): HttpResponse<Any> {
-        return response
-                .map { HttpResponse.ok(it).status(HttpStatus.OK) }
-                .getOrElse { HttpResponse.notFound() }
-    }
 }

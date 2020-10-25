@@ -1,8 +1,8 @@
 package pl.pollub.bsi.domain.user.api
 
-import javax.management.monitor.StringMonitor
-
 data class PasswordResponse(
+        val id: Long,
+        val userId: Long,
         val login: String,
         val password: String,
         val webAddress: String,
@@ -11,6 +11,8 @@ data class PasswordResponse(
 
     fun withPassword(password: String) : PasswordResponse {
         return PasswordResponse(
+                this.id,
+                this.userId,
                 this.login,
                 password,
                 this.webAddress,

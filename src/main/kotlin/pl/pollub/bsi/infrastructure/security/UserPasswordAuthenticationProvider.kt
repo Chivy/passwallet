@@ -17,7 +17,7 @@ import java.util.*
 import javax.inject.Singleton
 
 @Singleton
-class UserPasswordAuthenticationProvider(
+internal class UserPasswordAuthenticationProvider(
         private val userRepository: UserRepository,
         private val transactionManager: SynchronousTransactionManager<Connection>
 ) : AuthenticationProvider {

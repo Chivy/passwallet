@@ -6,6 +6,7 @@ import pl.pollub.bsi.application.error.ErrorResponse
 import pl.pollub.bsi.domain.user.api.UserCreationCommand
 import pl.pollub.bsi.domain.user.api.UserResponse
 import pl.pollub.bsi.domain.user.api.UserFacade
+import pl.pollub.bsi.domain.user.api.UserPasswordUpdateCommand
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,5 +23,10 @@ internal class UserFacadeImpl(
 
     override fun details(userId: Long, username: String): Either<ErrorResponse, UserResponse> {
         return userService.details(userId, username)
+    }
+
+    override fun updatePassword(userId: Long, name: String, userPasswordUpdateCommand: UserPasswordUpdateCommand): Either<ErrorResponse, UserResponse> {
+        return userService.updatePassword(userId, name, userPasswordUpdateCommand)
+                .map { it.toResponse() }
     }
 }

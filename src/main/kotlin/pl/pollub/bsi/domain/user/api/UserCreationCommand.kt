@@ -16,7 +16,7 @@ data class UserCreationCommand(
         val salt: String,
         val passwords: List<PasswordCreationCommand>
 ) {
-    fun toDomain(): User {
+    internal fun toDomain(): User {
         return User(
                 0,
                 this.login,

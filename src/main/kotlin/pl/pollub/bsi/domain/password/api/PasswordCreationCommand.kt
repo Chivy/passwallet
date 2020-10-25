@@ -14,6 +14,7 @@ data class PasswordCreationCommand(
 ) {
     fun toUserDomain(): UserPassword {
         return UserPassword(
+                0L,
                 this.login,
                 this.password,
                 this.webAddress,
@@ -24,7 +25,7 @@ data class PasswordCreationCommand(
     internal fun toDomain(userId: Long): Password {
         return Password(
                 PasswordId(
-                        null,
+                        0L,
                         userId
                 ),
                 this.login,
@@ -40,7 +41,7 @@ data class PasswordCreationCommand(
             return of(applicationRequest, "")
         }
 
-        fun of(applicationRequest: CreatePasswordApplicationRequest, masterPassword: String) : PasswordCreationCommand {
+        fun of(applicationRequest: CreatePasswordApplicationRequest, masterPassword: String): PasswordCreationCommand {
             return PasswordCreationCommand(
                     applicationRequest.login,
                     applicationRequest.password,

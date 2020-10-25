@@ -1,7 +1,7 @@
 package pl.pollub.bsi.domain.password
 
 data class PasswordId(
-        val id: Long? = 0L,
+        val id: Long,
         val userId: Long
 ) {
 

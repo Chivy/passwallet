@@ -6,6 +6,7 @@ import io.vavr.control.Option
 import nu.studer.sample.Tables.PASSWORDS
 import nu.studer.sample.Tables.USER
 import org.jooq.DSLContext
+import org.jooq.impl.DSL.row
 import pl.pollub.bsi.domain.api.Algorithm
 import pl.pollub.bsi.domain.user.User
 import pl.pollub.bsi.domain.user.api.UserResponse
@@ -14,7 +15,7 @@ import java.util.Optional.empty
 import javax.inject.Singleton
 
 @Singleton
-class JooqUserRepository(
+internal class JooqUserRepository(
         private val dslContext: DSLContext
 ) : UserRepository {
     override fun save(user: User): User {
@@ -53,6 +54,47 @@ class JooqUserRepository(
                             user.passwords
                     )
                 }
+    }
+
+    override fun update(user: User): User {
+        return dslContext.update(USER)
+                .set(
+                        row(
+                                USER.ALGORITHM,
+                                USER.SALT,
+                                USER.PASSWORD_HASH,
+                                USER.IS_PASSWORD_KEPT_AS_HASH
+                        ),
+                        row(
+                                user.algorithm.instance,
+                                user.salt,
+                                user.password,
+                                user.isPasswordHashed
+                        )
+                )
+                .where(USER.ID.eq(user.id))
+                .returningResult(
+                        USER.ID,
+                        USER.LOGIN,
+                        USER.ALGORITHM,
+                        USER.PASSWORD_HASH,
+                        USER.SALT,
+                        USER.IS_PASSWORD_KEPT_AS_HASH
+                )
+                .fetchOne()
+                .map {
+                    User(
+                            it.getValue(USER.ID),
+                            it.getValue(USER.LOGIN),
+                            it.getValue(USER.PASSWORD_HASH),
+                            Algorithm.resolve(it.getValue(USER.ALGORITHM)),
+                            it.getValue(USER.SALT),
+                            it.getValue(USER.IS_PASSWORD_KEPT_AS_HASH),
+                            user.passwords
+                    )
+                }
+
+
     }
 
     override fun existsByLogin(login: String): Boolean {

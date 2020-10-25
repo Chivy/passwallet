@@ -2,6 +2,7 @@ package pl.pollub.bsi.domain.password.api
 
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets
+import java.security.Key
 import java.security.MessageDigest
 import java.util.*
 import javax.crypto.Cipher
@@ -53,21 +54,22 @@ internal class Encrypter {
         companion object {
             fun encrypt(password: String, key: String?): String {
                 val cipher = Cipher.getInstance("AES")
-                cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(transformKey(key), "AES"))
+                cipher.init(Cipher.ENCRYPT_MODE, transformKey(key))
                 val encrypted = cipher.doFinal(password.toByteArray())
                 return Base64.getEncoder().encodeToString(encrypted)
             }
 
-            fun decrypt(password: String, key: String) : String {
+            fun decrypt(password: String, key: String): String {
                 val cipher = Cipher.getInstance("AES")
-                cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(transformKey(key), "AES"))
+                cipher.init(Cipher.DECRYPT_MODE, transformKey(key))
                 val decoded = Base64.getDecoder().decode(password)
                 return String(cipher.doFinal(decoded))
             }
 
-            private fun transformKey(key: String?) : ByteArray {
+            private fun transformKey(key: String?): Key {
                 val messageDigest = MessageDigest.getInstance("MD5")
-                     return messageDigest.digest(key?.toByteArray());
+                val digest = messageDigest.digest(key?.toByteArray())
+                return SecretKeySpec(digest, "AES");
             }
         }
     }
