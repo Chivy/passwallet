@@ -75,7 +75,7 @@ internal class UserService(
     private fun checkUserPermission(username: String, user: User): Either<ErrorResponse, User> {
         return userRepository.findByLogin(username)
                 .map { it.id }
-                .filter { it.equals(user.id) }
+                .filter { it == user.id }
                 .map { Either.right<ErrorResponse, User>(user) }
                 .getOrElse {
                     Either.left(
