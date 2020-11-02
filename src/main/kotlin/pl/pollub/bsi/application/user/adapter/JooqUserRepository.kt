@@ -1,17 +1,13 @@
-package pl.pollub.bsi.adapter.user
+package pl.pollub.bsi.application.user.adapter
 
 import io.vavr.collection.List
-import io.vavr.collection.List.empty
 import io.vavr.control.Option
-import nu.studer.sample.Tables.PASSWORDS
 import nu.studer.sample.Tables.USER
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.row
 import pl.pollub.bsi.domain.api.Algorithm
 import pl.pollub.bsi.domain.user.User
-import pl.pollub.bsi.domain.user.api.UserResponse
 import pl.pollub.bsi.domain.user.port.UserRepository
-import java.util.Optional.empty
 import javax.inject.Singleton
 
 @Singleton

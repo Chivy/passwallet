@@ -26,6 +26,10 @@ micronaut {
     }
 }
 
+test {
+    useJUnitPlatform()
+}
+
 dependencies {
 
     //micronaut
@@ -36,6 +40,7 @@ dependencies {
     implementation("io.micronaut.sql:micronaut-jooq")
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation("io.micronaut.data:micronaut-data-jdbc")
+    implementation 'org.spockframework:spock-core'
     annotationProcessor("io.micronaut:micronaut-inject-java")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
 

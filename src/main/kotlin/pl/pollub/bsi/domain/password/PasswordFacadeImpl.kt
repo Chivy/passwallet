@@ -5,7 +5,6 @@ import io.vavr.collection.List
 import io.vavr.control.Either
 import io.vavr.control.Option
 import pl.pollub.bsi.application.error.ErrorResponse
-import pl.pollub.bsi.application.password.PasswordService
 import pl.pollub.bsi.application.password.api.PasswordFacade
 import pl.pollub.bsi.application.password.api.PasswordUpdateCommand
 import pl.pollub.bsi.domain.password.api.PasswordCreationCommand

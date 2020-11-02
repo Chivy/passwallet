@@ -12,6 +12,7 @@ import javax.crypto.spec.SecretKeySpec
 internal class Encrypter {
 
     companion object {
+        @JvmStatic
         fun encrypt(algorithm: String, password: String, key: String?): String {
             return when (algorithm) {
                 "SHA-512" -> SHA512.encrypt(password, key)
@@ -38,7 +39,7 @@ internal class Encrypter {
 
     class HMAC {
         companion object {
-            private const val key = "47733c1cc9694d81";
+            private const val key = "47733c1cc9694d81"
             fun encrypt(password: String): String {
                 val byteKey = key.toByteArray(StandardCharsets.UTF_8)
                 val sha512Hmac = Mac.getInstance("HmacSHA512")
@@ -59,6 +60,7 @@ internal class Encrypter {
                 return Base64.getEncoder().encodeToString(encrypted)
             }
 
+            @JvmStatic
             fun decrypt(password: String, key: String): String {
                 val cipher = Cipher.getInstance("AES")
                 cipher.init(Cipher.DECRYPT_MODE, transformKey(key))
@@ -69,7 +71,7 @@ internal class Encrypter {
             private fun transformKey(key: String?): Key {
                 val messageDigest = MessageDigest.getInstance("MD5")
                 val digest = messageDigest.digest(key?.toByteArray())
-                return SecretKeySpec(digest, "AES");
+                return SecretKeySpec(digest, "AES")
             }
         }
     }

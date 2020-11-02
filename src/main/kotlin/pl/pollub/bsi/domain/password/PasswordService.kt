@@ -1,4 +1,4 @@
-package pl.pollub.bsi.application.password
+package pl.pollub.bsi.domain.password
 
 import io.micronaut.context.annotation.Context
 import io.vavr.collection.List

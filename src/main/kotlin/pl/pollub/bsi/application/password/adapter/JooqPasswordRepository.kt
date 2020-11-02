@@ -1,4 +1,4 @@
-package pl.pollub.bsi.adapter.user
+package pl.pollub.bsi.application.password.adapter
 
 import io.vavr.collection.List
 import io.vavr.control.Option
@@ -11,7 +11,6 @@ import org.jooq.impl.DSL.row
 import pl.pollub.bsi.domain.password.Password
 import pl.pollub.bsi.domain.password.PasswordId
 import pl.pollub.bsi.domain.password.port.PasswordRepository
-import pl.pollub.bsi.domain.user.api.PasswordResponse
 import javax.inject.Singleton
 
 @Singleton

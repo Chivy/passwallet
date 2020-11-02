@@ -13,7 +13,7 @@ data class UserCreationCommand(
         val login: String,
         val password: String,
         val algorithm: Algorithm,
-        val salt: String,
+        val salt: String?,
         val passwords: List<PasswordCreationCommand>
 ) {
     internal fun toDomain(): User {
@@ -22,7 +22,7 @@ data class UserCreationCommand(
                 this.login,
                 this.password,
                 this.algorithm,
-                UUID.randomUUID().toString(),
+                Option.of(salt).getOrElse(UUID.randomUUID().toString())!!,
                 this.algorithm == Algorithm.SHA_512,
                 this.passwords
                         .toStream()
