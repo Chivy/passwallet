@@ -51,7 +51,7 @@ class LoginHandlerService(private val loginAttemptRepository: LoginAttemptReposi
     private fun countFailedLogins(userId: Long) = loginAttemptRepository.findByUserId(userId)
             .toStream()
             .filter { !it.isSuccessful }
-            .count()
+            .count() + 1
 
     private fun calculateBlockadeTime(loginAttempts: Int, byIP: Boolean = false): LocalDateTime? {
         val now = LocalDateTime.now()
@@ -84,5 +84,5 @@ class LoginHandlerService(private val loginAttemptRepository: LoginAttemptReposi
     private fun countFailedIpLogins(ipAddress: String) = ipAuditRepository.findByIp(ipAddress)
             .toStream()
             .filter { !it.isSuccessful }
-            .count()
+            .count() + 1
 }
