@@ -76,7 +76,6 @@ class LoginHandlerFacade_HandleFailure_Test extends Specification {
         def result = sut.getLastLoginFailure(createdUser.id, IP_ADDRESS)
 
         then: "account should be blocked for more than 2 mins and IP permanently"
-        !LocalDateTime.now().plusMinutes(1).isAfter(result.accountBlockedTo)
         LocalDateTime.of(9999, 12, 31, 23, 59, 59) == result.ipBlockedTo
     }
 
