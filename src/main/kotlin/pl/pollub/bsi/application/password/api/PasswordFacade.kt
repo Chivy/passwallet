@@ -11,4 +11,5 @@ interface PasswordFacade {
     fun findByUserId(userId: Long): List<PasswordResponse>
     fun update(userId: Long, passwordUpdateCommand: PasswordUpdateCommand): Either<ErrorResponse, List<PasswordResponse>>
     fun findById(passwordId: Long): Either<ErrorResponse, PasswordResponse>
+    fun deleteByPasswordId(passwordId: Long): Long
 }

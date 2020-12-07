@@ -2,8 +2,8 @@ package pl.pollub.bsi.domain.user
 
 import io.vavr.collection.List
 import pl.pollub.bsi.application.user.adapter.InMemoryUserRepository
-import pl.pollub.bsi.domain.api.Algorithm
 import pl.pollub.bsi.domain.password.api.Encrypter
+import pl.pollub.bsi.domain.user.api.Algorithm
 import pl.pollub.bsi.domain.user.api.UserCreationCommand
 import pl.pollub.bsi.domain.user.api.UserFacade
 import spock.lang.Specification

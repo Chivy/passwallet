@@ -37,7 +37,7 @@ class InMemoryLoginAttemptRepository : LoginAttemptRepository {
     override fun deleteByUserId(userId: Long) {
         data.remove(
                 Stream.ofAll(data.entries)
-                        .find { it.value.userId == userId }
+                        .filter { it.value.userId == userId }
                         .map { it.value }
                         .map { it.id }
                         .getOrElse(0L)

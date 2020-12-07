@@ -40,6 +40,8 @@ dependencies {
     implementation("io.micronaut.sql:micronaut-jooq")
     implementation("io.micronaut.security:micronaut-security-jwt")
     implementation("io.micronaut.data:micronaut-data-jdbc")
+    annotationProcessor("io.micronaut.openapi:micronaut-openapi:2.2.0")
+    implementation("io.swagger.core.v3:swagger-annotations")
     implementation 'org.spockframework:spock-core'
     annotationProcessor("io.micronaut:micronaut-inject-java")
     annotationProcessor("io.micronaut.security:micronaut-security-annotations")
@@ -142,6 +144,11 @@ jooq {
             }
         }
     }
+}
+
+tasks.withType(JavaCompile) {
+    options.fork = true
+    options.forkOptions.jvmArgs << '-Dmicronaut.openapi.views.spec=swagger-ui.enabled=true,swagger-ui.theme=flattop'
 }
 
 compileKotlin {

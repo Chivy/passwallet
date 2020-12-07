@@ -1,6 +1,5 @@
-package pl.pollub.bsi.domain.api
+package pl.pollub.bsi.domain.user.api
 
-import io.vavr.collection.Stream
 import io.vavr.kotlin.toVavrStream
 
 enum class Algorithm(val instance: String) {

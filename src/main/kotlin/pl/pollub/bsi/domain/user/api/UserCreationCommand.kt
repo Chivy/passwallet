@@ -4,7 +4,6 @@ import io.vavr.collection.List
 import io.vavr.control.Option
 import io.vavr.kotlin.toVavrList
 import pl.pollub.bsi.application.user.api.CreateUserApplicationRequest
-import pl.pollub.bsi.domain.api.Algorithm
 import pl.pollub.bsi.domain.password.api.PasswordCreationCommand
 import pl.pollub.bsi.domain.user.User
 import java.util.*

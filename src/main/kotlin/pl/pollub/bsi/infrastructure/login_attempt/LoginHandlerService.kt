@@ -60,7 +60,6 @@ class LoginHandlerService(private val loginAttemptRepository: LoginAttemptReposi
             1 -> null
             2 -> now.plusSeconds(5)
             3 -> now.plusSeconds(10)
-            4 -> now.plusMinutes(2)
             else ->
                 if (byIP)
                     LocalDateTime.of(9999, 12, 31, 23, 59, 59)

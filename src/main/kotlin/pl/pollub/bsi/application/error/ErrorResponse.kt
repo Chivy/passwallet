@@ -14,5 +14,9 @@ data class ErrorResponse(val message: String) {
                     "${objectName.capitalize()} not found by ID: ${id.toString()}"
             )
         }
+
+        fun readMode(): ErrorResponse {
+            return ErrorResponse("You must me in modify mode to use this functionality.")
+        }
     }
 }

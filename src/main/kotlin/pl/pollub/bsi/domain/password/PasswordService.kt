@@ -51,4 +51,8 @@ internal class PasswordService(@Inject private val passwordRepository: PasswordR
                 .map { it.toResponse() }
     }
 
+    fun deleteByPasswordId(passwordId: Long): Long {
+        return passwordRepository.deleteByPasswordId(passwordId)
+    }
+
 }

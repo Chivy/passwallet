@@ -10,4 +10,5 @@ internal interface PasswordRepository {
     fun findByUserId(userId: Long): List<Password>
     fun update(passwordId: PasswordId, password: String): Password
     fun findById(passwordId: Long): Option<Password>
+    fun deleteByPasswordId(passwordId: Long): Long
 }

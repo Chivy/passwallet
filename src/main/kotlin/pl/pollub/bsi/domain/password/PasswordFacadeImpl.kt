@@ -26,6 +26,10 @@ internal class PasswordFacadeImpl(
                 .toEither { ErrorResponse.notFoundById("password", passwordId) }
     }
 
+    override fun deleteByPasswordId(passwordId: Long): Long {
+        return passwordService.deleteByPasswordId(passwordId)
+    }
+
     override fun update(userId: Long, passwordUpdateCommand: PasswordUpdateCommand): Either<ErrorResponse, List<PasswordResponse>> {
         return Option.of(passwordUpdateCommand)
                 .toEither(ErrorResponse.unexpected())

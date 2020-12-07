@@ -1,10 +1,12 @@
 package pl.pollub.bsi.application.user
 
+import io.micronaut.context.annotation.Context
 import io.micronaut.transaction.SynchronousTransactionManager
 import io.vavr.collection.List
 import io.vavr.control.Either
 import io.vavr.control.Option
 import io.vavr.kotlin.toVavrList
+import pl.pollub.bsi.application.AccessMode
 import pl.pollub.bsi.application.error.ErrorResponse
 import pl.pollub.bsi.application.password.api.PasswordFacade
 import pl.pollub.bsi.application.password.api.PasswordUpdateCommand
@@ -13,16 +15,16 @@ import pl.pollub.bsi.application.user.api.CreateUserApplicationResponse
 import pl.pollub.bsi.application.user.api.UpdatePasswordApplicationRequest
 import pl.pollub.bsi.domain.password.api.Encrypter
 import pl.pollub.bsi.domain.password.api.PasswordCreationCommand
+import pl.pollub.bsi.domain.shares.api.SharesFacade
 import pl.pollub.bsi.domain.user.api.*
 import java.sql.Connection
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@Context
 internal class UserApplicationService(
-        @Inject private val userFacade: UserFacade,
-        @Inject private val passwordFacade: PasswordFacade,
-        @Inject private val transactionManager: SynchronousTransactionManager<Connection>
+        private val userFacade: UserFacade,
+        private val passwordFacade: PasswordFacade,
+        private val sharesFacade: SharesFacade,
+        private val transactionManager: SynchronousTransactionManager<Connection>
 ) {
 
     internal fun save(createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, CreateUserApplicationResponse> {
@@ -37,11 +39,14 @@ internal class UserApplicationService(
         }
     }
 
-    internal fun updatePassword(userId: Long, username: String, updatePasswordApplicationRequest: UpdatePasswordApplicationRequest): Either<ErrorResponse, UserResponse> {
+    internal fun updatePassword(userId: Long, username: String, updatePasswordApplicationRequest: UpdatePasswordApplicationRequest, mode: AccessMode): Either<ErrorResponse, UserResponse> {
         return transactionManager.executeWrite {
-            val preupdatedUser = userFacade.details(userId, username);
+            val preupdatedUser = userFacade.details(userId, username)
 
-            return@executeWrite userFacade.updatePassword(userId, username, UserPasswordUpdateCommand.of(updatePasswordApplicationRequest))
+            return@executeWrite Option.of(updatePasswordApplicationRequest)
+                    .filter { mode == AccessMode.MODIFY }
+                    .toEither { ErrorResponse.readMode() }
+                    .flatMap { userFacade.updatePassword(userId, username, UserPasswordUpdateCommand.of(it)) }
                     .flatMap { userResponse ->
                         preupdatedUser
                                 .map {
@@ -62,24 +67,37 @@ internal class UserApplicationService(
                     .map { userResponse ->
                         Option.of(passwords)
                                 .filter { passwordsDisclosed }
-                                .map {
-                                    passwords
-                                            .toStream()
-                                            .map {
-                                                it.withPassword(
-                                                        Encrypter.AES.decrypt(
-                                                                it.password,
-                                                                userResponse.password
-                                                        )
-                                                )
-                                            }
-                                            .toVavrList()
-                                }
+                                .map { decryptPasswords(passwords, userResponse) }
                                 .map { userResponse.withPasswords(it) }
                                 .getOrElse { userResponse.withPasswords(passwords) }
                     }
+                    .flatMap {
+                        val sharedPasswords = getSharedPasswords(userId)
+                        sharedPasswords
+                                .toStream()
+                                .find { it.isLeft }
+                                .map { Either.left<ErrorResponse, UserResponse>(it.left) }
+                                .getOrElse {
+                                    Either.right(
+                                            it.withPasswords(
+                                                    it.passwords.appendAll(
+                                                            sharedPasswords
+                                                                    .toStream()
+                                                                    .map { it.get() }
+                                                                    .toVavrList()
+                                                    )
+                                            )
+                                    )
+                                }
+                    }
         }
     }
+
+    private fun getSharedPasswords(userId: Long) =
+            sharesFacade.findByUserId(userId)
+                    .toStream()
+                    .map { passwordFacade.findById(it.passwordId) }
+                    .toVavrList()
 
     private fun createPasswords(user: UserResponse, createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, UserResponse> {
         val passwordCreationResponses = delegatePasswordCreation(createUserApplicationRequest, user)
@@ -107,5 +125,8 @@ internal class UserApplicationService(
                 .toVavrList()
     }
 
-
+    private fun decryptPasswords(passwords: List<PasswordResponse>, userResponse: UserResponse) = passwords
+            .toStream()
+            .map { it.withPassword(Encrypter.AES.decrypt(it.password, userResponse.password)) }
+            .toVavrList()
 }

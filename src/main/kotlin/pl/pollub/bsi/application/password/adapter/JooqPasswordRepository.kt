@@ -59,6 +59,14 @@ internal class JooqPasswordRepository(
                 }
     }
 
+    override fun deleteByPasswordId(passwordId: Long): Long {
+        return dslContext.deleteFrom(PASSWORDS)
+                .where(PASSWORDS.ID.eq(passwordId))
+                .returningResult(PASSWORDS.ID)
+                .fetchOne()
+                .map { it.getValue(PASSWORDS.ID) }
+    }
+
     override fun update(passwordId: PasswordId, password: String): Password {
         return dslContext.update(PASSWORDS)
                 .set(

@@ -1,8 +1,7 @@
 package pl.pollub.bsi.domain.user
 
 import io.vavr.collection.List
-import pl.pollub.bsi.domain.api.Algorithm
-import pl.pollub.bsi.domain.password.Password
+import pl.pollub.bsi.domain.user.api.Algorithm
 import pl.pollub.bsi.domain.user.api.UserResponse
 import java.util.*
 
@@ -57,7 +56,7 @@ internal class User(
                 this.id,
                 this.login,
                 this.password,
-                Algorithm.Companion.valueOf(algorithm),
+                Algorithm.valueOf(algorithm),
                 this.salt,
                 algorithm == Algorithm.SHA_512.instance,
                 this.passwords

@@ -45,4 +45,8 @@ internal class InMemoryPasswordRepository : PasswordRepository {
         return Stream.ofAll(data.values)
                 .find { it.passwordId.id == passwordId }
     }
+
+    override fun deleteByPasswordId(passwordId: Long): Long {
+        return data.remove(passwordId)?.passwordId?.id!!
+    }
 }

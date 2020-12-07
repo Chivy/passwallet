@@ -10,11 +10,10 @@ import pl.pollub.bsi.domain.user.api.UserCreationCommand
 import pl.pollub.bsi.domain.user.api.UserPasswordUpdateCommand
 import pl.pollub.bsi.domain.user.api.UserResponse
 import pl.pollub.bsi.domain.user.port.UserRepository
-import javax.inject.Inject
 
 @Context
 internal class UserService(
-        @Inject private val userRepository: UserRepository,
+        private val userRepository: UserRepository,
 ) {
     internal fun create(userCreationCommand: UserCreationCommand): Either<ErrorResponse, User> {
         return Option.of(userCreationCommand)
@@ -69,6 +68,11 @@ internal class UserService(
                             List.empty()
                     )
                 }
+                .map { it.toResponse() }
+    }
+
+    internal fun findByUsername(username: String): Option<UserResponse> {
+        return userRepository.findByLogin(username)
                 .map { it.toResponse() }
     }
 

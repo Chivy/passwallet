@@ -1,18 +1,17 @@
 package pl.pollub.bsi.domain.user
 
+import io.micronaut.context.annotation.Context
 import io.vavr.control.Either
 import io.vavr.control.Option
 import pl.pollub.bsi.application.error.ErrorResponse
 import pl.pollub.bsi.domain.user.api.UserCreationCommand
-import pl.pollub.bsi.domain.user.api.UserResponse
 import pl.pollub.bsi.domain.user.api.UserFacade
 import pl.pollub.bsi.domain.user.api.UserPasswordUpdateCommand
-import javax.inject.Inject
-import javax.inject.Singleton
+import pl.pollub.bsi.domain.user.api.UserResponse
 
-@Singleton
+@Context
 internal class UserFacadeImpl(
-        @Inject private val userService: UserService,
+        private val userService: UserService,
 ) : UserFacade {
     override fun create(userCreationCommand: UserCreationCommand): Either<ErrorResponse, UserResponse> {
         return Option.of(userCreationCommand)
@@ -28,5 +27,9 @@ internal class UserFacadeImpl(
     override fun updatePassword(userId: Long, name: String, userPasswordUpdateCommand: UserPasswordUpdateCommand): Either<ErrorResponse, UserResponse> {
         return userService.updatePassword(userId, name, userPasswordUpdateCommand)
                 .map { it.toResponse() }
+    }
+
+    override fun findByUsername(username: String): Option<UserResponse> {
+        return userService.findByUsername(username)
     }
 }

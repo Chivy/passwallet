@@ -1,7 +1,6 @@
 package pl.pollub.bsi.domain.user.api
 
 import io.vavr.collection.List
-import pl.pollub.bsi.domain.api.Algorithm
 
 data class UserResponse(
         val id: Long,

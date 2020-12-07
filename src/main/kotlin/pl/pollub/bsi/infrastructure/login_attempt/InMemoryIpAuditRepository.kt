@@ -37,7 +37,7 @@ class InMemoryIpAuditRepository : IpAuditRepository {
     override fun deleteByIpAddress(ipAddress: String) {
         data.remove(
                 Stream.ofAll(data.entries)
-                        .find { it.value.ipAddress == ipAddress }
+                        .filter { it.value.ipAddress == ipAddress }
                         .map { it.value.id }
                         .getOrElse(0L)
         )

@@ -5,10 +5,10 @@ import pl.pollub.bsi.application.password.adapter.InMemoryPasswordRepository
 import pl.pollub.bsi.application.password.api.PasswordFacade
 import pl.pollub.bsi.application.password.api.PasswordUpdateCommand
 import pl.pollub.bsi.application.user.adapter.InMemoryUserRepository
-import pl.pollub.bsi.domain.api.Algorithm
 import pl.pollub.bsi.domain.password.api.PasswordCreationCommand
 import pl.pollub.bsi.domain.user.UserFacadeImpl
 import pl.pollub.bsi.domain.user.UserService
+import pl.pollub.bsi.domain.user.api.Algorithm
 import pl.pollub.bsi.domain.user.api.UserCreationCommand
 import pl.pollub.bsi.domain.user.api.UserFacade
 import pl.pollub.bsi.domain.user.api.UserPasswordUpdateCommand

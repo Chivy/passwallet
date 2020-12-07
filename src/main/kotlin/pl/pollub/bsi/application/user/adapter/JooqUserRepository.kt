@@ -5,8 +5,8 @@ import io.vavr.control.Option
 import nu.studer.sample.Tables.USER
 import org.jooq.DSLContext
 import org.jooq.impl.DSL.row
-import pl.pollub.bsi.domain.api.Algorithm
 import pl.pollub.bsi.domain.user.User
+import pl.pollub.bsi.domain.user.api.Algorithm
 import pl.pollub.bsi.domain.user.port.UserRepository
 import javax.inject.Singleton
 

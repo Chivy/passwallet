@@ -1,6 +1,5 @@
 package pl.pollub.bsi.application.user
 
-
 import io.vavr.collection.List
 import io.vavr.control.Either
 import pl.pollub.bsi.MockTransactionManager
@@ -9,17 +8,20 @@ import pl.pollub.bsi.application.password.api.PasswordFacade
 import pl.pollub.bsi.application.user.adapter.InMemoryUserRepository
 import pl.pollub.bsi.application.user.api.CreateUserApplicationRequest
 import pl.pollub.bsi.application.user.api.CreateUserApplicationResponse
-import pl.pollub.bsi.domain.api.Algorithm
+import pl.pollub.bsi.domain.shares.api.SharesFacade
 import pl.pollub.bsi.domain.user.UserFacadeImpl
 import pl.pollub.bsi.domain.user.UserService
+import pl.pollub.bsi.domain.user.api.Algorithm
 import spock.lang.Specification
 
 class UserApplicationService_Create_Test extends Specification {
     PasswordFacade passwordFacade = Mock()
+    SharesFacade sharesFacade = Mock()
 
     UserApplicationService sut = new UserApplicationService(
             new UserFacadeImpl(new UserService(new InMemoryUserRepository())),
             passwordFacade,
+            sharesFacade,
             new MockTransactionManager()
     )
 

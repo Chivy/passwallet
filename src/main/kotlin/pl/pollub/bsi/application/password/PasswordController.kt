@@ -5,6 +5,7 @@ import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.*
 import io.micronaut.security.annotation.Secured
 import io.micronaut.security.rules.SecurityRule.IS_AUTHENTICATED
+import pl.pollub.bsi.application.AccessMode
 import pl.pollub.bsi.application.password.api.CreatePasswordApplicationRequest
 import pl.pollub.bsi.infrastructure.response.ResponseResolver
 import java.security.Principal
@@ -20,6 +21,27 @@ internal class PasswordController(private val passwordApplicationService: Passwo
         return responseResolver.resolve(
                 passwordApplicationService.create(userId, principal.name, passwordCreationApplicationRequest),
                 HttpStatus.CREATED
+        )
+    }
+
+    @Get
+    fun detailsList(@PathVariable userId: Long,
+                    principal: Principal,
+                    passwordsDisclosed: Boolean = false): HttpResponse<Any> {
+        return responseResolver.resolve(
+                passwordApplicationService.detailsList(userId, principal.name, passwordsDisclosed),
+                HttpStatus.OK
+        )
+    }
+
+    @Delete("{passwordId}")
+    fun delete(@PathVariable userId: Long,
+               @PathVariable passwordId: Long,
+               @Header(value = "MODE", defaultValue = "READ") accessMode: AccessMode,
+               principal: Principal): HttpResponse<*> {
+        return responseResolver.resolve(
+                passwordApplicationService.delete(userId, passwordId, principal.name, accessMode),
+                HttpStatus.OK
         )
     }
 
