@@ -3,6 +3,7 @@ package pl.pollub.bsi.application.user
 import io.micronaut.context.annotation.Context
 import io.micronaut.transaction.SynchronousTransactionManager
 import io.vavr.collection.List
+import io.vavr.collection.Traversable
 import io.vavr.control.Either
 import io.vavr.control.Option
 import io.vavr.kotlin.toVavrList
@@ -71,50 +72,37 @@ internal class UserApplicationService(
                                 .map { userResponse.withPasswords(it) }
                                 .getOrElse { userResponse.withPasswords(passwords) }
                     }
-                    .flatMap {
-                        val sharedPasswords = getSharedPasswords(userId)
-                        sharedPasswords
-                                .toStream()
-                                .find { it.isLeft }
-                                .map { Either.left<ErrorResponse, UserResponse>(it.left) }
-                                .getOrElse {
-                                    Either.right(
-                                            it.withPasswords(
-                                                    it.passwords.appendAll(
-                                                            sharedPasswords
-                                                                    .toStream()
-                                                                    .map { it.get() }
-                                                                    .toVavrList()
-                                                    )
-                                            )
-                                    )
-                                }
-                    }
+                    .flatMap { user -> addSharedPasswords(user, passwordsDisclosed) }
         }
     }
 
-    private fun getSharedPasswords(userId: Long) =
-            sharesFacade.findByUserId(userId)
-                    .toStream()
-                    .map { passwordFacade.findById(it.passwordId) }
-                    .toVavrList()
+    private fun addSharedPasswords(user: UserResponse, passwordsDisclosed: Boolean) =
+            Either.sequenceRight(getSharedPasswords(user.id))
+                    .map { sharedPasswords ->
+                        user.copy(passwords =
+                        user.passwords.appendAll(
+                                sharedPasswords
+                                        .toStream()
+                                        .map { sharedPassword -> if (passwordsDisclosed) decrypt(sharedPassword) else sharedPassword }
+                                        .toVavrList()
+                        )
+                        )
+                    }
+
+    private fun decrypt(sharedPassword: PasswordResponse): PasswordResponse? {
+        return findPasswordOwner(sharedPassword.userId)
+                ?.password
+                ?.let { Encrypter.AES.decrypt(sharedPassword.password, it) }
+                ?.let { sharedPassword.copy(password = it) }
+    }
+
+    private fun findPasswordOwner(userId: Long): UserResponse? {
+        return userFacade.findById(userId).orNull
+    }
 
     private fun createPasswords(user: UserResponse, createUserApplicationRequest: CreateUserApplicationRequest): Either<ErrorResponse, UserResponse> {
-        val passwordCreationResponses = delegatePasswordCreation(createUserApplicationRequest, user)
-        return passwordCreationResponses
-                .toStream()
-                .find { it.isLeft }
-                .map { Either.left<ErrorResponse, UserResponse>(it.left) }
-                .getOrElse {
-                    Either.right(
-                            user.withPasswords(
-                                    passwordCreationResponses
-                                            .toStream()
-                                            .map { it.get() }
-                                            .toVavrList()
-                            )
-                    )
-                }
+        return Either.sequenceRight(delegatePasswordCreation(createUserApplicationRequest, user))
+                .map { user.withPasswords(List.ofAll(it)) }
     }
 
     private fun delegatePasswordCreation(createUserApplicationRequest: CreateUserApplicationRequest, user: UserResponse): List<Either<ErrorResponse, PasswordResponse>> {
@@ -125,8 +113,15 @@ internal class UserApplicationService(
                 .toVavrList()
     }
 
-    private fun decryptPasswords(passwords: List<PasswordResponse>, userResponse: UserResponse) = passwords
+    private fun decryptPasswords(passwords: Traversable<PasswordResponse>, userResponse: UserResponse) = passwords
             .toStream()
             .map { it.withPassword(Encrypter.AES.decrypt(it.password, userResponse.password)) }
             .toVavrList()
+
+
+    private fun getSharedPasswords(userId: Long) =
+            sharesFacade.findByUserId(userId)
+                    .toStream()
+                    .map { passwordFacade.findById(it.passwordId) }
+                    .toVavrList()
 }

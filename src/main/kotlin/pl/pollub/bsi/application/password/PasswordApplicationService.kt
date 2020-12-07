@@ -50,18 +50,12 @@ internal class PasswordApplicationService(
     fun detailsList(userId: Long, name: String, passwordsDisclosed: Boolean): Either<ErrorResponse, List<PasswordResponse>> {
         return transactionManager.executeRead {
             val user = userFacade.findByUsername(name).orNull
-            val passwords = getPasswordsWithShareds(user, userId, name)
+            val sharedPasswords = getPasswordsWithShareds(user, userId, name)
             return@executeRead Option.of(passwordsDisclosed)
                     .filter { it == true }
                     .map { validateUserPermission(user, userId) }
-                    .map {
-                        passwords.map {
-                            it
-                                    .toStream()
-                                    .map { password -> password.withPassword(Encrypter.AES.decrypt(password.password, user.password)) }
-                                    .toVavrList()
-                        }
-                    }.getOrElse(passwords)
+                    .map { sharedPasswords.map { decrypt(it) } }
+                    .getOrElse(sharedPasswords)
         }
     }
 
@@ -94,6 +88,26 @@ internal class PasswordApplicationService(
         return Option.of(user)
                 .filter { userId == it?.id }
                 .toEither { ErrorResponse("User: ${user?.login} has no permission to manage passwords of user with ID: $userId") }
+    }
+
+    private fun decrypt(it: List<PasswordResponse>) = it
+            .toStream()
+            .map { password ->
+                password.withPassword(
+                        Encrypter.AES.decrypt(
+                                password.password,
+                                findSharedPasswordMasterPassword(password.id))
+                )
+            }
+            .toVavrList()
+
+    private fun findSharedPasswordMasterPassword(passwordId: Long): String {
+        return passwordFacade.findById(passwordId)
+                .toOption()
+                .map { it.userId }
+                .flatMap { userFacade.findById(it) }
+                .map { it.password }
+                .getOrElse { "" }
     }
 }
 

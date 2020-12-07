@@ -9,4 +9,5 @@ interface UserFacade {
     fun details(userId: Long, username: String): Either<ErrorResponse, UserResponse>
     fun updatePassword(userId: Long, name: String, userPasswordUpdateCommand: UserPasswordUpdateCommand): Either<ErrorResponse, UserResponse>
     fun findByUsername(username: String): Option<UserResponse>
+    fun findById(userId: Long): Option<UserResponse>
 }

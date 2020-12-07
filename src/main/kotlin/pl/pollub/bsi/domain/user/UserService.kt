@@ -76,6 +76,10 @@ internal class UserService(
                 .map { it.toResponse() }
     }
 
+    fun findById(userId: Long): Option<UserResponse> {
+        return userRepository.findById(userId).map { it.toResponse() }
+    }
+
     private fun checkUserPermission(username: String, user: User): Either<ErrorResponse, User> {
         return userRepository.findByLogin(username)
                 .map { it.id }

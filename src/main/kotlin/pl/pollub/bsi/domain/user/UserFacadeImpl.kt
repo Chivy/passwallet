@@ -32,4 +32,8 @@ internal class UserFacadeImpl(
     override fun findByUsername(username: String): Option<UserResponse> {
         return userService.findByUsername(username)
     }
+
+    override fun findById(userId: Long): Option<UserResponse> {
+        return userService.findById(userId)
+    }
 }
