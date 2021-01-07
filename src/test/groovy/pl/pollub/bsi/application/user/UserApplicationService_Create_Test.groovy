@@ -1,5 +1,6 @@
 package pl.pollub.bsi.application.user
 
+import io.micronaut.context.event.ApplicationEventPublisher
 import io.vavr.collection.List
 import io.vavr.control.Either
 import pl.pollub.bsi.MockTransactionManager
@@ -19,7 +20,7 @@ class UserApplicationService_Create_Test extends Specification {
     SharesFacade sharesFacade = Mock()
 
     UserApplicationService sut = new UserApplicationService(
-            new UserFacadeImpl(new UserService(new InMemoryUserRepository())),
+            new UserFacadeImpl(new UserService(new InMemoryUserRepository()), Mock(ApplicationEventPublisher)),
             passwordFacade,
             sharesFacade,
             new MockTransactionManager()

@@ -15,129 +15,172 @@ import javax.inject.Singleton
 
 @Singleton
 internal class JooqPasswordRepository(
-        private val dslContext: DSLContext
+    private val dslContext: DSLContext
 ) : PasswordRepository {
     override fun save(userId: Long, password: Password): Password {
         return dslContext.insertInto(PASSWORDS)
-                .columns(
-                        PASSWORDS.ID,
-                        PASSWORDS.LOGIN,
-                        PASSWORDS.PASSWORD,
-                        PASSWORDS.WEB_ADDRESS,
-                        PASSWORDS.DESCRIPTION,
-                        PASSWORDS.USER_ID
+            .columns(
+                PASSWORDS.ID,
+                PASSWORDS.LOGIN,
+                PASSWORDS.PASSWORD,
+                PASSWORDS.WEB_ADDRESS,
+                PASSWORDS.DESCRIPTION,
+                PASSWORDS.USER_ID
+            )
+            .values(
+                dslContext.nextval(Sequences.PASSWORD_SEQ),
+                password.login,
+                password.password,
+                password.webAddress,
+                password.description,
+                userId
+            )
+            .returning(
+                PASSWORDS.ID,
+                PASSWORDS.USER_ID,
+                PASSWORDS.LOGIN,
+                PASSWORDS.PASSWORD,
+                PASSWORDS.WEB_ADDRESS,
+                PASSWORDS.DESCRIPTION
+            )
+            .fetchOne()
+            .map {
+                Password(
+                    PasswordId(
+                        it.getValue(PASSWORDS.ID),
+                        it.getValue(PASSWORDS.USER_ID)
+                    ),
+                    it.getValue(PASSWORDS.LOGIN),
+                    it.getValue(PASSWORDS.PASSWORD),
+                    password.masterPassword,
+                    it.getValue(PASSWORDS.WEB_ADDRESS),
+                    it.getValue(PASSWORDS.DESCRIPTION)
                 )
-                .values(
-                        dslContext.nextval(Sequences.PASSWORD_SEQ),
-                        password.login,
-                        password.password,
-                        password.webAddress,
-                        password.description,
-                        userId
-                )
-                .returning(
-                        PASSWORDS.ID,
-                        PASSWORDS.USER_ID,
-                        PASSWORDS.LOGIN,
-                        PASSWORDS.PASSWORD,
-                        PASSWORDS.WEB_ADDRESS,
-                        PASSWORDS.DESCRIPTION
-                )
-                .fetchOne()
-                .map {
-                    Password(
-                            PasswordId(
-                                    it.getValue(PASSWORDS.ID),
-                                    it.getValue(PASSWORDS.USER_ID)
-                            ),
-                            it.getValue(PASSWORDS.LOGIN),
-                            it.getValue(PASSWORDS.PASSWORD),
-                            password.masterPassword,
-                            it.getValue(PASSWORDS.WEB_ADDRESS),
-                            it.getValue(PASSWORDS.DESCRIPTION)
-                    )
-                }
+            }
     }
 
     override fun deleteByPasswordId(passwordId: Long): Long {
-        return dslContext.deleteFrom(PASSWORDS)
-                .where(PASSWORDS.ID.eq(passwordId))
-                .returningResult(PASSWORDS.ID)
-                .fetchOne()
-                .map { it.getValue(PASSWORDS.ID) }
+        return dslContext.update(PASSWORDS)
+            .set(row(PASSWORDS.DELETED), row(true))
+            .where(PASSWORDS.ID.eq(passwordId))
+            .returningResult(PASSWORDS.ID)
+            .fetchOptional()
+            .map { it.getValue(PASSWORDS.ID) }.orElse(0L)
+    }
+
+    override fun restore(modifiedRecordId: Long) {
+        dslContext.update(PASSWORDS)
+            .set(row(PASSWORDS.DELETED), row(false))
+            .where(PASSWORDS.ID.eq(modifiedRecordId))
+            .returningResult(PASSWORDS.ID)
+            .fetchOptional()
+            .map { it.getValue(PASSWORDS.ID) }.orElse(0L)
+    }
+
+    override fun update(passwordId: Long, password: String): Password {
+        return dslContext.update(PASSWORDS)
+            .set(
+                row(PASSWORDS.PASSWORD),
+                row(password)
+            )
+            .where(PASSWORDS.ID.eq(passwordId))
+            .returning(
+                PASSWORDS.ID,
+                PASSWORDS.USER_ID,
+                PASSWORDS.LOGIN,
+                PASSWORDS.PASSWORD,
+                PASSWORDS.WEB_ADDRESS,
+                PASSWORDS.DESCRIPTION
+            )
+            .fetchOne()
+            .map {
+                Password(
+                    PasswordId(
+                        it.getValue(PASSWORDS.ID),
+                        it.getValue(PASSWORDS.USER_ID)
+                    ),
+                    it.getValue(PASSWORDS.LOGIN),
+                    it.getValue(PASSWORDS.PASSWORD),
+                    null,
+                    it.getValue(PASSWORDS.WEB_ADDRESS),
+                    it.getValue(PASSWORDS.DESCRIPTION)
+                )
+            }
+
+
     }
 
     override fun update(passwordId: PasswordId, password: String): Password {
         return dslContext.update(PASSWORDS)
-                .set(
-                        row(PASSWORDS.PASSWORD),
-                        row(password)
+            .set(
+                row(PASSWORDS.PASSWORD),
+                row(password)
+            )
+            .where(PASSWORDS.ID.eq(passwordId.id))
+            .and(PASSWORDS.USER_ID.eq(passwordId.userId))
+            .returning(
+                PASSWORDS.ID,
+                PASSWORDS.USER_ID,
+                PASSWORDS.LOGIN,
+                PASSWORDS.PASSWORD,
+                PASSWORDS.WEB_ADDRESS,
+                PASSWORDS.DESCRIPTION
+            )
+            .fetchOne()
+            .map {
+                Password(
+                    PasswordId(
+                        it.getValue(PASSWORDS.ID),
+                        it.getValue(PASSWORDS.USER_ID)
+                    ),
+                    it.getValue(PASSWORDS.LOGIN),
+                    it.getValue(PASSWORDS.PASSWORD),
+                    null,
+                    it.getValue(PASSWORDS.WEB_ADDRESS),
+                    it.getValue(PASSWORDS.DESCRIPTION)
                 )
-                .where(PASSWORDS.ID.eq(passwordId.id))
-                .and(PASSWORDS.USER_ID.eq(passwordId.userId))
-                .returning(
-                        PASSWORDS.ID,
-                        PASSWORDS.USER_ID,
-                        PASSWORDS.LOGIN,
-                        PASSWORDS.PASSWORD,
-                        PASSWORDS.WEB_ADDRESS,
-                        PASSWORDS.DESCRIPTION
-                )
-                .fetchOne()
-                .map {
-                    Password(
-                            PasswordId(
-                                    it.getValue(PASSWORDS.ID),
-                                    it.getValue(PASSWORDS.USER_ID)
-                            ),
-                            it.getValue(PASSWORDS.LOGIN),
-                            it.getValue(PASSWORDS.PASSWORD),
-                            null,
-                            it.getValue(PASSWORDS.WEB_ADDRESS),
-                            it.getValue(PASSWORDS.DESCRIPTION)
-                    )
-                }
+            }
 
     }
 
     override fun findById(passwordId: Long): Option<Password> {
-        return Option.of(
-                dslContext.selectFrom(PASSWORDS)
-                        .where(PASSWORDS.ID.eq(passwordId))
-                        .fetchOne()
-                        .map {
-                            Password(
-                                    PasswordId(
-                                            it.getValue(PASSWORDS.ID),
-                                            it.getValue(PASSWORDS.USER_ID)
-                                    ),
-                                    it.getValue(PASSWORDS.LOGIN),
-                                    it.getValue(PASSWORDS.PASSWORD),
-                                    null,
-                                    it.getValue(PASSWORDS.WEB_ADDRESS),
-                                    it.getValue(PASSWORDS.DESCRIPTION)
-                            )
-                        }
+        return Option.ofOptional(
+            dslContext.selectFrom(PASSWORDS)
+                .where(PASSWORDS.ID.eq(passwordId))
+                .fetchOptional()
+                .map {
+                    Password(
+                        PasswordId(
+                            it.getValue(PASSWORDS.ID),
+                            it.getValue(PASSWORDS.USER_ID)
+                        ),
+                        it.getValue(PASSWORDS.LOGIN),
+                        it.getValue(PASSWORDS.PASSWORD),
+                        null,
+                        it.getValue(PASSWORDS.WEB_ADDRESS),
+                        it.getValue(PASSWORDS.DESCRIPTION)
+                    )
+                }
         )
     }
 
     override fun findByUserId(userId: Long): List<Password> {
         return dslContext.selectFrom(PASSWORDS)
-                .where(PASSWORDS.USER_ID.eq(userId))
-                .fetch()
-                .toVavrStream()
-                .map {
-                    Password(
-                            PasswordId(
-                                    it.getValue(PASSWORDS.ID),
-                                    it.getValue(PASSWORDS.USER_ID)
-                            ),
-                            it.getValue(PASSWORDS.LOGIN),
-                            it.getValue(PASSWORDS.PASSWORD),
-                            null,
-                            it.getValue(PASSWORDS.WEB_ADDRESS),
-                            it.getValue(PASSWORDS.DESCRIPTION)
-                    )
-                }.toVavrList()
+            .where(PASSWORDS.USER_ID.eq(userId))
+            .fetch()
+            .toVavrStream()
+            .map {
+                Password(
+                    PasswordId(
+                        it.getValue(PASSWORDS.ID),
+                        it.getValue(PASSWORDS.USER_ID)
+                    ),
+                    it.getValue(PASSWORDS.LOGIN),
+                    it.getValue(PASSWORDS.PASSWORD),
+                    null,
+                    it.getValue(PASSWORDS.WEB_ADDRESS),
+                    it.getValue(PASSWORDS.DESCRIPTION)
+                )
+            }.toVavrList()
     }
 }

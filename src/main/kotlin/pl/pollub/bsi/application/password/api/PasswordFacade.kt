@@ -9,7 +9,8 @@ import pl.pollub.bsi.domain.user.api.PasswordResponse
 interface PasswordFacade {
     fun create(userId: Long, passwordCreationCommand: PasswordCreationCommand) : Either<ErrorResponse, PasswordResponse>
     fun findByUserId(userId: Long): List<PasswordResponse>
+    fun update(walletPasswordUpdateCommand: WalletPasswordUpdateCommand): Either<ErrorResponse, PasswordResponse>
     fun update(userId: Long, passwordUpdateCommand: PasswordUpdateCommand): Either<ErrorResponse, List<PasswordResponse>>
     fun findById(passwordId: Long): Either<ErrorResponse, PasswordResponse>
-    fun deleteByPasswordId(passwordId: Long): Long
+    fun deleteByPasswordId(userId: Long, passwordId: Long): Long
 }

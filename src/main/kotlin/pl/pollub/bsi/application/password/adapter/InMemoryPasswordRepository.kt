@@ -31,22 +31,34 @@ internal class InMemoryPasswordRepository : PasswordRepository {
     override fun findByUserId(userId: Long): List<Password> {
         return Stream.ofAll(data.values)
                 .filter { it.passwordId.userId == userId }
-                .toVavrList()
+            .toVavrList()
     }
 
     override fun update(passwordId: PasswordId, password: String): Password {
         return findById(passwordId.id)
-                .map { it.withPassword(password) }
-                .peek { data[passwordId.id] = it }
-                .getOrElseThrow { RuntimeException() }
+            .map { it.withPassword(password) }
+            .peek { data[passwordId.id] = it }
+            .getOrElseThrow { RuntimeException() }
+    }
+
+    override fun update(passwordId: Long, password: String): Password {
+        return findById(passwordId)
+            .map { it.withPassword(password) }
+            .peek { data[passwordId] = it }
+            .getOrElseThrow { RuntimeException() }
+
     }
 
     override fun findById(passwordId: Long): Option<Password> {
         return Stream.ofAll(data.values)
-                .find { it.passwordId.id == passwordId }
+            .find { it.passwordId.id == passwordId }
     }
 
     override fun deleteByPasswordId(passwordId: Long): Long {
         return data.remove(passwordId)?.passwordId?.id!!
+    }
+
+    override fun restore(modifiedRecordId: Long) {
+        TODO("Not yet implemented")
     }
 }

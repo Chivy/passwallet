@@ -16,41 +16,45 @@ import javax.inject.Inject
 
 @Controller("users")
 internal class UserController(
-        @Inject private val userApplicationService: UserApplicationService,
-        @Inject private val responseResolver: ResponseResolver
+    @Inject private val userApplicationService: UserApplicationService,
+    @Inject private val responseResolver: ResponseResolver
 ) {
 
     @PermitAll
     @Post
     internal fun register(@Body createUserApplicationRequest: CreateUserApplicationRequest): HttpResponse<Any> {
         return responseResolver.resolve(
-                userApplicationService.save(createUserApplicationRequest), HttpStatus.CREATED
+            userApplicationService.save(createUserApplicationRequest), HttpStatus.CREATED
         )
     }
 
     @Get("{userId}")
     @Secured(SecurityRule.IS_AUTHENTICATED)
-    internal fun details(@PathVariable userId: Long,
-                         passwordDisclosed: Boolean?,
-                         principal: Principal): HttpResponse<Any> {
+    internal fun details(
+        @PathVariable userId: Long,
+        passwordDisclosed: Boolean?,
+        principal: Principal
+    ): HttpResponse<Any> {
 
         return responseResolver.resolve(
-                userApplicationService.details(
-                        userId,
-                        principal.name,
-                        Option.of(passwordDisclosed).getOrElse(false)!!,
-                ), HttpStatus.OK
+            userApplicationService.details(
+                userId,
+                principal.name,
+                Option.of(passwordDisclosed).getOrElse(false)!!,
+            ), HttpStatus.OK
         )
     }
 
     @Put("{userId}")
     @Secured(SecurityRule.IS_AUTHENTICATED)
-    internal fun updatePassword(@PathVariable userId: Long,
-                                @Body updatePasswordApplicationRequest: UpdatePasswordApplicationRequest,
-                                @Header(value = "MODE", defaultValue = "READ") mode: AccessMode,
-                                principal: Principal): HttpResponse<Any> {
+    internal fun updatePassword(
+        @PathVariable userId: Long,
+        @Body updatePasswordApplicationRequest: UpdatePasswordApplicationRequest,
+        @Header(value = "MODE", defaultValue = "READ") mode: AccessMode,
+        principal: Principal
+    ): HttpResponse<Any> {
         return responseResolver.resolve(
-                userApplicationService.updatePassword(userId, principal.name, updatePasswordApplicationRequest, mode), HttpStatus.OK
+            userApplicationService.updatePassword(userId, principal.name, updatePasswordApplicationRequest, mode), HttpStatus.OK
         )
     }
 }

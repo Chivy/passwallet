@@ -1,5 +1,6 @@
 package pl.pollub.bsi.domain.user
 
+import io.micronaut.context.event.ApplicationEventPublisher
 import io.vavr.collection.List
 import pl.pollub.bsi.application.user.adapter.InMemoryUserRepository
 import pl.pollub.bsi.domain.password.api.Encrypter
@@ -10,7 +11,10 @@ import pl.pollub.bsi.domain.user.api.UserPasswordUpdateCommand
 import spock.lang.Specification
 
 class UserFacade_UpdatePassword_Test extends Specification {
-    UserFacade sut = new UserFacadeImpl(new UserService(new InMemoryUserRepository()))
+    UserFacade sut = new UserFacadeImpl(
+            new UserService(new InMemoryUserRepository()),
+            Mock(ApplicationEventPublisher)
+    )
 
     def "should update user's password, algorithm and salt"() {
         def salt = UUID.randomUUID().toString()

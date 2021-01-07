@@ -1,5 +1,6 @@
 package pl.pollub.bsi.domain.user
 
+import io.micronaut.context.event.ApplicationEventPublisher
 import io.vavr.collection.List
 import pl.pollub.bsi.application.user.adapter.InMemoryUserRepository
 import pl.pollub.bsi.domain.password.api.Encrypter
@@ -9,7 +10,10 @@ import pl.pollub.bsi.domain.user.api.UserFacade
 import spock.lang.Specification
 
 class UserFacade_Details_Test extends Specification {
-    UserFacade sut = new UserFacadeImpl(new UserService(new InMemoryUserRepository()))
+    UserFacade sut = new UserFacadeImpl(
+            new UserService(new InMemoryUserRepository()),
+            Mock(ApplicationEventPublisher)
+    )
 
     def "should return correct details when user has permission to view them"() {
         setup: "create user"
